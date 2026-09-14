@@ -150,6 +150,8 @@ activemq-data/
 # Environments
 .env
 .envrc
+.cognito_tokens
+.cognito_tokens.json
 .venv
 env/
 venv/
