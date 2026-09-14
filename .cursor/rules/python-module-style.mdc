@@ -1,0 +1,33 @@
+---
+description: Python module style — 200-line cap, one primary function, reuse first
+alwaysApply: true
+---
+
+# Python module style
+
+## File size
+
+- No source file may exceed **200 lines**. If it would, split by responsibility into another module under the correct folder (`pipeline/`, `model/`, `tools/`, etc.).
+
+## One primary unit per file
+
+- Each file should expose **one primary public function** (or one primary public class for Pydantic models / agent entrypoints).
+- Keep helpers private (`_helper`) and minimal; if helpers grow, move them to their own file and reuse.
+- Avoid “god modules” that mix loading, prompting, tools, and I/O.
+
+```python
+# ❌ BAD — multiple unrelated public APIs in one file
+def load_case(): ...
+def search_policy(): ...
+def run_agent(): ...
+
+# ✅ GOOD — one public entry; tiny private helper OK
+def run_case_ingest(case_id: str) -> CasePack:
+    return _read_pack(case_id)
+```
+
+## Reuse before adding
+
+- Search existing `pipeline/`, `tools/`, `model/`, `prompt/`, `agents/`, and `examples/` first.
+- Do not duplicate helpers.
+- Only add a new function/file when nothing suitable exists.

@@ -1,0 +1,35 @@
+---
+description: CLI entry — all uv commands go through src/main.py
+alwaysApply: true
+---
+
+# CLI entrypoint
+
+- All user-facing command-line workflows start from **`src/main.py`** (Typer app).
+- Prefer:
+
+```bash
+uv run python src/main.py <command> [options]
+```
+
+- Keep `main.py` thin: create the Typer `app` and **register** commands from `src/cli/`.
+- Put each command in its own file under `src/cli/` (one primary command function per file).
+- Tool CLIs live under `src/cli/tools/` and are mounted as `main.py tools <tool-name>`.
+- Command bodies stay thin — call into `pipeline/`, `agents/`, or `tools/`.
+- Do not add new top-level scripts under `scripts/` for product features (validator/CI scripts already in-repo are fine).
+- Do not tell users to run `uv run python src/pipeline/...` or `src/agents/...` directly for normal workflows.
+
+```python
+# ✅ main.py — register only
+from cli.ingest_text_embeddings import ingest_text_embeddings
+from cli.tools import app as tools_app
+
+app = typer.Typer(...)
+app.command()(ingest_text_embeddings)
+app.add_typer(tools_app, name="tools")
+
+# ✅ cli/tools/list_case_filenames.py — thin tool command
+def list_case_filenames(case_id: str) -> None:
+    for name in run_list_case_filenames(case_id):
+        typer.echo(name)
+```

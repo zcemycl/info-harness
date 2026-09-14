@@ -1,0 +1,3 @@
+# Ignore local data artefacts; keep the directory.
+*
+!.gitignore
