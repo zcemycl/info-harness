@@ -6,7 +6,7 @@ DEFAULT_SCRAPE_VERSION = "v0.0.4"
 
 
 class FdaScrapeVersions(BaseModel):
-    """Version map sent as the search_by_tradename request body."""
+    """Version map sent as the FDA label search request body."""
 
     fdalabel: str | None = Field(default=DEFAULT_SCRAPE_VERSION)
     indication_usage: str | None = Field(default=DEFAULT_SCRAPE_VERSION)

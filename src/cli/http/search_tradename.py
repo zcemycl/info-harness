@@ -6,8 +6,8 @@ import json
 
 import typer
 
+from hc_http.search_fdalabel_tradename import run_search_fdalabel_tradename
 from model.fda_scrape_versions import DEFAULT_SCRAPE_VERSION, FdaScrapeVersions
-from tools.search_fdalabel_tradename import run_search_fdalabel_tradename
 
 
 def search_tradename(

@@ -3,8 +3,7 @@
 import typer
 
 from cli.cognito_login import cognito_login
-from cli.hello import hello
-from cli.tools import app as tools_app
+from cli.http import app as http_app
 
 app = typer.Typer(
     name="main",
@@ -13,9 +12,8 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
-app.command()(hello)
 app.command("cognito-login")(cognito_login)
-app.add_typer(tools_app, name="tools")
+app.add_typer(http_app, name="http")
 
 if __name__ == "__main__":
     app()

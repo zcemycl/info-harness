@@ -2,7 +2,7 @@
 
 CLI and agent harness for ingest / tool / workflow experiments.
 
-Layout and conventions mirror a thin Typer + `uv` project: sole entry at `src/main.py`, one command per file under `src/cli/`, pipelines in `src/pipeline/`, models in `src/model/`, prompts in `src/prompt/`, agents in `src/agents/`, tools in `src/tools/`.
+Layout and conventions mirror a thin Typer + `uv` project: sole entry at `src/main.py`, one command per file under `src/cli/`, HTTP clients in `src/hc_http/`, pipelines in `src/pipeline/`, models in `src/model/`, prompts in `src/prompt/`, agents in `src/agents/`, tools in `src/tools/`.
 
 ## Prerequisites
 
@@ -28,20 +28,13 @@ cp .env.example .env
 # CLI help
 uv run python src/main.py --help
 
-# Smoke check
-uv run python src/main.py hello
+# Cognito login (saves JWTs to `.cognito_tokens.json`)
+uv run python src/main.py cognito-login -u USERNAME -p PASSWORD
 
-# Tools subgroup
-uv run python src/main.py tools --help
-uv run python src/main.py tools echo "hello"
-
-# Format / lint / typecheck / tests
-uv run black src tests
-uv run isort src tests
-uv run flake8 src tests
-uv run mypy
-uv run pre-commit run --all-files
-uv run pytest
+# HC HTTP subgroup
+uv run python src/main.py http --help
+uv run python src/main.py http search-tradename Keytruda
+uv run python src/main.py http search-indication melanoma
 ```
 
 CI runs the same lint suite via [`.github/workflows/lint.yml`](.github/workflows/lint.yml).
@@ -53,12 +46,13 @@ See [`src/cli/readme.md`](src/cli/readme.md) for CLI conventions.
 src/
   main.py          # sole CLI entry (registers commands only)
   cli/             # one Typer command per file
-    tools/         # main.py tools <tool>
+    http/          # main.py http <command>
+  hc_http/         # HC platform HTTP clients / requests
   pipeline/        # ingest / preprocess / run steps
   model/           # pydantic only
   prompt/          # prompts only
   agents/          # one folder per agent
-  tools/           # agent / CLI tools
+  tools/           # callable tools (auth helpers, etc.)
   examples/        # few-shot examples
 tests/
 data/              # local inputs (gitignored artefacts as needed)

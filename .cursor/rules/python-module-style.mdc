@@ -28,6 +28,6 @@ def run_case_ingest(case_id: str) -> CasePack:
 
 ## Reuse before adding
 
-- Search existing `pipeline/`, `tools/`, `model/`, `prompt/`, `agents/`, and `examples/` first.
+- Search existing `pipeline/`, `tools/`, `hc_http/`, `model/`, `prompt/`, `agents/`, and `examples/` first.
 - Do not duplicate helpers.
 - Only add a new function/file when nothing suitable exists.
