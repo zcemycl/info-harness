@@ -3,6 +3,7 @@
 import typer
 
 from cli.tools.echo import echo
+from cli.tools.search_tradename import search_tradename
 
 app = typer.Typer(
     name="tools",
@@ -12,3 +13,4 @@ app = typer.Typer(
 )
 
 app.command("echo")(echo)
+app.command("search-tradename")(search_tradename)
