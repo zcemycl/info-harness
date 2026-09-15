@@ -1,0 +1,11 @@
+"""Request body for FDA adverse-effects compare."""
+
+from __future__ import annotations
+
+from pydantic import BaseModel, Field
+
+
+class CompareAdverseEffectsItem(BaseModel):
+    """Setids to compare for adverse-effects matrices."""
+
+    setids: list[str] = Field(min_length=1)

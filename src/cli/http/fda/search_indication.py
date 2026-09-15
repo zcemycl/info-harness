@@ -6,12 +6,10 @@ import json
 
 import typer
 
-from hc_http.search_fdalabel_indication import (
-    DEFAULT_CACHE_KEY,
-    DEFAULT_SORT_BY,
-    run_search_fdalabel_indication,
-)
+from hc_http.fda._cache_key import DEFAULT_CACHE_KEY
+from hc_http.fda.search_by_indication import DEFAULT_SORT_BY
 from model.fda_scrape_versions import DEFAULT_SCRAPE_VERSION, FdaScrapeVersions
+from tools.fda.search_fdalabel_indication import search_fdalabel_indication
 
 
 def search_indication(
@@ -34,7 +32,7 @@ def search_indication(
 ) -> None:
     """Search FDA labels by indication (HC API)."""
     try:
-        results = run_search_fdalabel_indication(
+        results = search_fdalabel_indication(
             indication,
             versions=FdaScrapeVersions.all(version),
             maxn=maxn,
@@ -46,5 +44,4 @@ def search_indication(
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
         typer.secho(str(exc), fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1) from exc
-
     typer.echo(json.dumps(results, indent=2))

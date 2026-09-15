@@ -2,7 +2,7 @@
 
 CLI and agent harness for ingest / tool / workflow experiments.
 
-Layout and conventions mirror a thin Typer + `uv` project: sole entry at `src/main.py`, one command per file under `src/cli/`, HTTP clients in `src/hc_http/`, pipelines in `src/pipeline/`, models in `src/model/`, prompts in `src/prompt/`, agents in `src/agents/`, tools in `src/tools/`.
+Layout and conventions mirror a thin Typer + `uv` project: sole entry at `src/main.py`, one command per file under `src/cli/`, HTTP clients in `src/hc_http/` (domain folders), pipelines in `src/pipeline/`, models in `src/model/`, prompts in `src/prompt/`, agents in `src/agents/`, tools in `src/tools/` (domain folders).
 
 ## Prerequisites
 
@@ -31,11 +31,17 @@ uv run python src/main.py --help
 # Cognito login (saves JWTs to `.cognito_tokens.json`)
 uv run python src/main.py cognito-login -u USERNAME -p PASSWORD
 
-# HC HTTP subgroup
+# HC HTTP subgroups (mirrors hc-backend routers)
 uv run python src/main.py http --help
-uv run python src/main.py http search-tradename Keytruda
-uv run python src/main.py http search-indication melanoma
+uv run python src/main.py http fda search-tradename Keytruda
+uv run python src/main.py http fda search-indication melanoma
+uv run python src/main.py http fda search-by-compare-filters --filters-json '{"filters":null}'
+uv run python src/main.py http ctg search-condition melanoma
+uv run python src/main.py http ctg search-by-compare-filters --filters-json '{"filters":null}'
+uv run python src/main.py http ta search immuno
+uv run python src/main.py http pubmed search "pembrolizumab melanoma"
 ```
+
 
 CI runs the same lint suite via [`.github/workflows/lint.yml`](.github/workflows/lint.yml).
 See [`src/cli/readme.md`](src/cli/readme.md) for CLI conventions.
@@ -45,14 +51,26 @@ See [`src/cli/readme.md`](src/cli/readme.md) for CLI conventions.
 ```text
 src/
   main.py          # sole CLI entry (registers commands only)
-  cli/             # one Typer command per file
-    http/          # main.py http <command>
-  hc_http/         # HC platform HTTP clients / requests
+  cli/
+    http/          # main.py http <domain> <command>
+      fda/
+      ctg/
+      therapeutic_area/
+      pubmed/
+  hc_http/         # HTTP clients by domain (HC + PubMed E-utils)
+    fda/
+    ctg/
+    therapeutic_area/
+    pubmed/
   pipeline/        # ingest / preprocess / run steps
   model/           # pydantic only
   prompt/          # prompts only
   agents/          # one folder per agent
-  tools/           # callable tools (auth helpers, etc.)
+  tools/           # agent-facing wrappers by domain
+    fda/
+    ctg/
+    therapeutic_area/
+    pubmed/
   examples/        # few-shot examples
 tests/
 data/              # local inputs (gitignored artefacts as needed)

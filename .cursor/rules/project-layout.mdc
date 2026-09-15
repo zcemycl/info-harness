@@ -10,12 +10,12 @@ Keep new code under `src/` with these folders. Do not invent parallel trees.
 | Folder | Purpose |
 |--------|---------|
 | `src/cli/` | Typer CLI command handlers — **one command per file** |
-| `src/hc_http/` | HC platform HTTP clients / request helpers |
+| `src/hc_http/` | HTTP clients / request helpers (HC + PubMed), **by domain folder** |
 | `src/pipeline/` | Ingestion, preprocessing, and orchestration steps only |
 | `src/model/` | Pydantic models / schemas |
 | `src/prompt/` | LLM prompt templates and static prompt markdown |
 | `src/agents/` | Agents SDK agents — **one agent per subfolder** |
-| `src/tools/` | Callable tools used by agents (and thin wrappers around them) |
+| `src/tools/` | Callable tools for agents — **by domain folder** wrapping `hc_http/` |
 | `src/examples/` | Few-shot examples for prompts / agents |
 
 ```text
@@ -23,16 +23,18 @@ src/
   main.py                 # sole CLI entry (registers commands only)
   cli/
     <command>.py          # one Typer command per file
-    http/                 # http subgroup: main.py http <command>
-      <command>.py
-  hc_http/                # HC platform HTTP clients / requests
+    http/                 # main.py http <domain> <command>
+      fda/ ctg/ therapeutic_area/ pubmed/
+  hc_http/                # HTTP clients by domain
+    fda/ ctg/ therapeutic_area/ pubmed/
   pipeline/               # ingest / preprocess / run steps
   model/                  # pydantic only
   prompt/                 # prompts only
   agents/
     <agent_name>/         # one folder per agent
       ...
-  tools/                  # agent tools (non-HTTP helpers)
+  tools/                  # agent tools by domain
+    fda/ ctg/ therapeutic_area/ pubmed/
   examples/               # few-shot examples
 ```
 
@@ -40,7 +42,8 @@ src/
 
 - Pipelines (ingestion, preprocessing, batch runs) live in `pipeline/`, not in `agents/`, `cli/`, or `main.py`.
 - CLI argument parsing and `typer.echo` live in `cli/`; call into `pipeline/`, `agents/`, `hc_http/`, or `tools/` for real work.
-- HC HTTP CLIs live under `src/cli/http/` and are mounted as `main.py http <command>`.
+- HTTP CLIs live under `src/cli/http/<domain>/` and are mounted as `main.py http <domain> <command>`.
+- Group HC clients/tools by domain (`fda`, `ctg`, `therapeutic_area`, `pubmed`) rather than a flat `hc_http/` dump.
 - Do not put Pydantic models in `pipeline/` or `agents/`; import from `model/`.
 - Do not inline long prompts in agent code; load from `prompt/`.
 - Do not bury few-shot examples in prompts as unstructured blobs when they belong in `examples/`.

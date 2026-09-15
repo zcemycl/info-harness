@@ -14,7 +14,7 @@ uv run python src/main.py <command> [options]
 
 - Keep `main.py` thin: create the Typer `app` and **register** commands from `src/cli/`.
 - Put each command in its own file under `src/cli/` (one primary command function per file).
-- HC HTTP CLIs live under `src/cli/http/` and are mounted as `main.py http <command>`.
+- HTTP CLIs live under `src/cli/http/<domain>/` and are mounted as `main.py http <domain> <command>`.
 - Command bodies stay thin — call into `pipeline/`, `agents/`, `hc_http/`, or `tools/`.
 - Do not add new top-level scripts under `scripts/` for product features (validator/CI scripts already in-repo are fine).
 - Do not tell users to run `uv run python src/pipeline/...` or `src/agents/...` directly for normal workflows.
@@ -28,7 +28,10 @@ app = typer.Typer(...)
 app.command("cognito-login")(cognito_login)
 app.add_typer(http_app, name="http")
 
-# ✅ cli/http/search_tradename.py — thin HTTP command
+# ✅ cli/http/__init__.py — domain subgroups
+app.add_typer(fda_app, name="fda")
+
+# ✅ cli/http/fda/search_tradename.py — thin HTTP command
 def search_tradename(tradename: str) -> None:
-    typer.echo(json.dumps(run_search_fdalabel_tradename(tradename), indent=2))
+    typer.echo(json.dumps(search_fdalabel_tradename(tradename), indent=2))
 ```
