@@ -63,7 +63,7 @@ src/
     therapeutic_area/
     pubmed/
   pipeline/        # ingest / preprocess / run steps
-  model/           # pydantic only
+  model/           # pydantic schemas (fda/, ctg/, pubmed/ + request models)
   prompt/          # prompts only
   agents/          # one folder per agent
   tools/           # agent-facing wrappers by domain

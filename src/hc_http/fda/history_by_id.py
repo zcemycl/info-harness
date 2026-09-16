@@ -2,24 +2,22 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from hc_http.fda._versions_body import _versions_body
 from hc_http.hc_request import hc_request_json
+from model.fda.fda_label_history import FdaLabelHistory
 from model.fda_scrape_versions import FdaScrapeVersions
+from model.parse_model import parse_model
 
 
 def run_fdalabel_history_by_id(
     setid: str,
     *,
     versions: FdaScrapeVersions | None = None,
-) -> dict[str, Any]:
+) -> FdaLabelHistory:
     """POST /fdalabels/history/{id} and return label history."""
     data = hc_request_json(
         "POST",
         f"/fdalabels/history/{setid}",
         json_body=_versions_body(versions),
     )
-    if not isinstance(data, dict):
-        raise RuntimeError(f"Unexpected HC API response type: {type(data).__name__}")
-    return data
+    return parse_model(FdaLabelHistory, data)

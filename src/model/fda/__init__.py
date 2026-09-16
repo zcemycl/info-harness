@@ -1,0 +1,1 @@
+"""FDA domain Pydantic models."""

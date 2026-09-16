@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from hc_http.compare_filters_body import compare_filters_body
 from hc_http.hc_request import hc_request_json
 from model.advanced_filters import AdvancedFilterPayload
+from model.fda.fda_compare_filter_row import FdaCompareFilterRow
 from model.fda_scrape_versions import FdaScrapeVersions
+from model.parse_model_list import parse_model_list
 from model.refine_filters import RefineFilters
 
 DEFAULT_CACHE_KEY = "2026-03-26d"
@@ -22,8 +22,8 @@ def run_search_fdalabel_by_compare_filters(
     offset: int = 0,
     embedding_threshold: float = 0.6,
     cache_key: str = DEFAULT_CACHE_KEY,
-) -> list[dict[str, Any]]:
-    """POST /fdalabels/search_by_compare_filters and return row dicts."""
+) -> list[FdaCompareFilterRow]:
+    """POST /fdalabels/search_by_compare_filters and return typed rows."""
     data = hc_request_json(
         "POST",
         "/fdalabels/search_by_compare_filters",
@@ -41,6 +41,4 @@ def run_search_fdalabel_by_compare_filters(
         ),
         timeout=120.0,
     )
-    if not isinstance(data, list):
-        raise RuntimeError(f"Unexpected HC API response type: {type(data).__name__}")
-    return data
+    return parse_model_list(FdaCompareFilterRow, data)

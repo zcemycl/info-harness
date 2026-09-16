@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import json
-
 import typer
 
+from cli.http.dump_json import dump_json
 from model.fda_scrape_versions import DEFAULT_SCRAPE_VERSION, FdaScrapeVersions
 from tools.fda.search_fdalabel_by_id import search_fdalabel_by_id
 
@@ -34,4 +33,4 @@ def search_by_id(
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
         typer.secho(str(exc), fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1) from exc
-    typer.echo(json.dumps(results, indent=2))
+    typer.echo(dump_json(results))

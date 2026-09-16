@@ -2,19 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from hc_http.pubmed.pubmed_request import pubmed_request_json
+from model.parse_model import parse_model
+from model.pubmed.pubmed_summary_response import PubmedSummaryResponse
 
 
-def run_fetch_pubmed_summaries(pmids: list[str]) -> dict[str, Any]:
-    """GET esummary.fcgi for PubMed IDs and return the JSON payload."""
+def run_fetch_pubmed_summaries(pmids: list[str]) -> PubmedSummaryResponse:
+    """GET esummary.fcgi for PubMed IDs and return a typed payload."""
     if not pmids:
-        return {"result": {}}
+        return PubmedSummaryResponse()
     data = pubmed_request_json(
         "/esummary.fcgi",
         params={"db": "pubmed", "id": ",".join(pmids)},
     )
-    if not isinstance(data, dict):
-        raise RuntimeError(f"Unexpected PubMed response type: {type(data).__name__}")
-    return data
+    return parse_model(PubmedSummaryResponse, data)

@@ -6,6 +6,9 @@ from pydantic import BaseModel, Field
 
 
 class CompareAdverseEffectsItem(BaseModel):
-    """Setids to compare for adverse-effects matrices."""
+    """Setids to compare for adverse-effects matrices (hc-backend Item)."""
 
-    setids: list[str] = Field(min_length=1)
+    setids: list[str] = Field(
+        min_length=1,
+        description="SPL setids whose AE tables should be compared",
+    )

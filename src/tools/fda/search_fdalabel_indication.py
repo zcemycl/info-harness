@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from hc_http.fda._cache_key import DEFAULT_CACHE_KEY
 from hc_http.fda.search_by_indication import (
     DEFAULT_SORT_BY,
     run_search_fdalabel_indication,
 )
+from model.fda.fda_label import FdaLabel
 from model.fda_scrape_versions import FdaScrapeVersions
 
 
@@ -21,7 +20,7 @@ def search_fdalabel_indication(
     limit: int = 10,
     sort_by: str = DEFAULT_SORT_BY,
     cache_key: str = DEFAULT_CACHE_KEY,
-) -> list[dict[str, Any]]:
+) -> list[FdaLabel]:
     """Search FDA labels by indication text."""
     return run_search_fdalabel_indication(
         indication,

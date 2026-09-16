@@ -12,7 +12,7 @@ Keep new code under `src/` with these folders. Do not invent parallel trees.
 | `src/cli/` | Typer CLI command handlers — **one command per file** |
 | `src/hc_http/` | HTTP clients / request helpers (HC + PubMed), **by domain folder** |
 | `src/pipeline/` | Ingestion, preprocessing, and orchestration steps only |
-| `src/model/` | Pydantic models / schemas |
+| `src/model/` | Pydantic models / schemas — domain folders (`fda/`, `ctg/`, `pubmed/`) for agent tool I/O |
 | `src/prompt/` | LLM prompt templates and static prompt markdown |
 | `src/agents/` | Agents SDK agents — **one agent per subfolder** |
 | `src/tools/` | Callable tools for agents — **by domain folder** wrapping `hc_http/` |

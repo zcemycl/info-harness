@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from hc_http.pubmed.pubmed_request import pubmed_request_json
+from model.parse_model import parse_model
+from model.pubmed.pubmed_search_response import PubmedSearchResponse
 
 
 def run_search_pubmed(
@@ -13,8 +13,8 @@ def run_search_pubmed(
     retmax: int = 20,
     retstart: int = 0,
     sort: str = "relevance",
-) -> dict[str, Any]:
-    """GET esearch.fcgi for PubMed and return the JSON payload."""
+) -> PubmedSearchResponse:
+    """GET esearch.fcgi for PubMed and return a typed payload."""
     data = pubmed_request_json(
         "/esearch.fcgi",
         params={
@@ -25,6 +25,4 @@ def run_search_pubmed(
             "sort": sort,
         },
     )
-    if not isinstance(data, dict):
-        raise RuntimeError(f"Unexpected PubMed response type: {type(data).__name__}")
-    return data
+    return parse_model(PubmedSearchResponse, data)

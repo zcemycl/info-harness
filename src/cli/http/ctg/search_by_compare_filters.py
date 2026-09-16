@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import json
-
 import typer
 
+from cli.http.dump_json import dump_json
 from cli.http.parse_json_object import parse_json_object
 from hc_http.ctg.search_by_compare_filters import DEFAULT_CACHE_KEY
 from model.advanced_filters import AdvancedFilterPayload
@@ -45,4 +44,4 @@ def search_by_compare_filters(
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
         typer.secho(str(exc), fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1) from exc
-    typer.echo(json.dumps(results, indent=2))
+    typer.echo(dump_json(results))

@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import json
-
 import typer
 
+from cli.http.dump_json import dump_json
 from hc_http.fda._cache_key import DEFAULT_CACHE_KEY
 from model.fda_scrape_versions import DEFAULT_SCRAPE_VERSION, FdaScrapeVersions
 from tools.fda.autocomplete_fdalabel_tradename import autocomplete_fdalabel_tradename
@@ -33,4 +32,4 @@ def autocomplete_tradename(
     except (FileNotFoundError, RuntimeError, ValueError) as exc:
         typer.secho(str(exc), fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1) from exc
-    typer.echo(json.dumps(results, indent=2))
+    typer.echo(dump_json(results))
