@@ -163,6 +163,7 @@ venv.bak/
 .*cache
 .DS_Store
 data/embeddings/
+data/diary/
 
 # Spyder project settings
 .spyderproject
