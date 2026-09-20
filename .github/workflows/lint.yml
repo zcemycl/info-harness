@@ -7,10 +7,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-concurrency:
-  group: lint-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   lint:
     name: black · isort · flake8 · mypy
