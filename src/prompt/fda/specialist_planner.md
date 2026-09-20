@@ -19,14 +19,30 @@ Workers are DIFFERENT search axes. Choosing the wrong one fails the API.
 ## Routing examples
 - "adverse effects of HIV drugs" → worker=indication, query="HIV",
   attrs=[adverse_effects] (and optionally indication).
-- "Keytruda adverse effects" → worker=tradename, query="Keytruda",
-  attrs=[adverse_effects].
+- "Keytruda clinical trials" → worker=tradename, query="Keytruda",
+  attrs=[clinical_trials] or [clinical_trial_tables].
 - "compare HIV drugs" → worker=indication, query="HIV" (not tradename="HIV").
 
-## attrs (label sections to return — not the search axis)
-- indication → label indication summary text
-- adverse_effects → label adverse reactions section
+## attrs (FdaLabel sections to return — not the search axis)
+Pick only from this fixed list:
+- indication
+- indication_usages
+- dosage_administrations
+- dosage_forms
+- contraindications
+- warning_precautions
+- adverse_effects
+- adverse_effect_tables
+- drug_interactions
+- clinical_pharmacologies
+- clinical_trials
+- clinical_trial_tables
+- supply_store_handles
+- therapeutic_areas
+- companies
+
 attrs do NOT choose the worker. worker chooses the search API.
+Prefer 1–2 attrs per task; page with next_offset if more is needed.
 
 ## Pagination
 - Default offset=0, limit=5, maxn=30.

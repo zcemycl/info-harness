@@ -1,4 +1,4 @@
-"""Search FDA labels by tradename; return adverse_effects hits only."""
+"""Search FDA labels by tradename; return drug_interactions hits only."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from tools.fda.search_fdalabel_tradename.search_attr import (
 )
 
 
-def search_fdalabel_tradename_adverse_effects(
+def search_fdalabel_tradename_drug_interactions(
     tradename: str,
     *,
     versions: FdaScrapeVersions | None = None,
@@ -19,9 +19,9 @@ def search_fdalabel_tradename_adverse_effects(
     offset: int = 0,
     limit: int = 5,
 ) -> FdaLabelAttrPage[FdaLabelAttrHit]:
-    """Search by tradename; return id/setid/tradename/adverse_effects page."""
+    """Search by tradename; return id/setid/tradename/drug_interactions page."""
     return search_fdalabel_tradename_attr(
-        FdaAttrName.ADVERSE_EFFECTS,
+        FdaAttrName.DRUG_INTERACTIONS,
         tradename,
         versions=versions,
         maxn=maxn,

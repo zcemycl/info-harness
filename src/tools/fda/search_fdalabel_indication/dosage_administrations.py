@@ -1,4 +1,4 @@
-"""Search FDA labels by indication; return indication hits only."""
+"""Search FDA labels by indication; return dosage_administrations hits only."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from tools.fda.search_fdalabel_indication.search_attr import (
 )
 
 
-def search_fdalabel_indication_indication(
+def search_fdalabel_indication_dosage_administrations(
     indication: str,
     *,
     versions: FdaScrapeVersions | None = None,
@@ -23,9 +23,9 @@ def search_fdalabel_indication_indication(
     sort_by: str = DEFAULT_SORT_BY,
     cache_key: str = DEFAULT_CACHE_KEY,
 ) -> FdaLabelAttrPage[FdaLabelAttrHit]:
-    """Search by indication; return id/setid/tradename/indication page."""
+    """Search by indication; return id/setid/tradename/dosage_administrations page."""
     return search_fdalabel_indication_attr(
-        FdaAttrName.INDICATION,
+        FdaAttrName.DOSAGE_ADMINISTRATIONS,
         indication,
         versions=versions,
         maxn=maxn,

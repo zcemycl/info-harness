@@ -1,4 +1,4 @@
-"""Search FDA labels by indication; return indication hits only."""
+"""Search FDA labels by indication; return therapeutic_areas hits only."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from tools.fda.search_fdalabel_indication.search_attr import (
 )
 
 
-def search_fdalabel_indication_indication(
+def search_fdalabel_indication_therapeutic_areas(
     indication: str,
     *,
     versions: FdaScrapeVersions | None = None,
@@ -23,9 +23,9 @@ def search_fdalabel_indication_indication(
     sort_by: str = DEFAULT_SORT_BY,
     cache_key: str = DEFAULT_CACHE_KEY,
 ) -> FdaLabelAttrPage[FdaLabelAttrHit]:
-    """Search by indication; return id/setid/tradename/indication page."""
+    """Search by indication; return id/setid/tradename/therapeutic_areas page."""
     return search_fdalabel_indication_attr(
-        FdaAttrName.INDICATION,
+        FdaAttrName.THERAPEUTIC_AREAS,
         indication,
         versions=versions,
         maxn=maxn,

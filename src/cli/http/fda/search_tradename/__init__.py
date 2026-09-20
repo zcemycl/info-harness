@@ -2,8 +2,9 @@
 
 import typer
 
-from cli.http.fda.search_tradename.adverse_effects import adverse_effects
-from cli.http.fda.search_tradename.indication import indication
+from cli.http.fda.search_tradename.register_attr_commands import (
+    register_tradename_attr_commands,
+)
 
 app = typer.Typer(
     name="search-tradename",
@@ -12,5 +13,4 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
-app.command("indication")(indication)
-app.command("adverse-effects")(adverse_effects)
+register_tradename_attr_commands(app)

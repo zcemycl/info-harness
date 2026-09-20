@@ -1,18 +1,16 @@
-"""Search FDA labels by indication text; return adverse-effects hits only."""
+"""Search FDA labels by indication; return adverse_effects hits only."""
 
 from __future__ import annotations
 
 from hc_http.fda._cache_key import DEFAULT_CACHE_KEY
-from hc_http.fda.search_by_indication import (
-    DEFAULT_SORT_BY,
-    run_search_fdalabel_indication,
-)
-from model.fda.fda_label_adverse_effects_hit import FdaLabelAdverseEffectsHit
+from hc_http.fda.search_by_indication import DEFAULT_SORT_BY
+from model.fda.fda_attr_name import FdaAttrName
+from model.fda.fda_label_attr_hit import FdaLabelAttrHit
 from model.fda.fda_label_attr_page import FdaLabelAttrPage
 from model.fda_scrape_versions import FdaScrapeVersions
-from tools.fda.project_adverse_effects_hit import project_adverse_effects_hit
-from tools.fda.wrap_attr_page import wrap_attr_page
-from tools.trace_call import trace_info, trace_span
+from tools.fda.search_fdalabel_indication.search_attr import (
+    search_fdalabel_indication_attr,
+)
 
 
 def search_fdalabel_indication_adverse_effects(
@@ -24,26 +22,15 @@ def search_fdalabel_indication_adverse_effects(
     limit: int = 5,
     sort_by: str = DEFAULT_SORT_BY,
     cache_key: str = DEFAULT_CACHE_KEY,
-) -> FdaLabelAttrPage[FdaLabelAdverseEffectsHit]:
+) -> FdaLabelAttrPage[FdaLabelAttrHit]:
     """Search by indication; return id/setid/tradename/adverse_effects page."""
-    with trace_span(
-        "tool",
-        "search_fdalabel_indication_adverse_effects",
-        indication=indication,
+    return search_fdalabel_indication_attr(
+        FdaAttrName.ADVERSE_EFFECTS,
+        indication,
+        versions=versions,
+        maxn=maxn,
         offset=offset,
         limit=limit,
-        maxn=maxn,
-    ):
-        labels = run_search_fdalabel_indication(
-            indication,
-            versions=versions,
-            maxn=maxn,
-            offset=offset,
-            limit=limit,
-            sort_by=sort_by,
-            cache_key=cache_key,
-        )
-        items = [project_adverse_effects_hit(label) for label in labels]
-        page = wrap_attr_page(items, offset=offset, limit=limit)
-        trace_info("page", items=len(page.items), next_offset=page.next_offset)
-        return page
+        sort_by=sort_by,
+        cache_key=cache_key,
+    )

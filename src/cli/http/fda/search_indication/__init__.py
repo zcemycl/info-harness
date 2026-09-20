@@ -2,8 +2,9 @@
 
 import typer
 
-from cli.http.fda.search_indication.adverse_effects import adverse_effects
-from cli.http.fda.search_indication.indication import indication
+from cli.http.fda.search_indication.register_attr_commands import (
+    register_indication_attr_commands,
+)
 
 app = typer.Typer(
     name="search-indication",
@@ -12,5 +13,4 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
-app.command("indication")(indication)
-app.command("adverse-effects")(adverse_effects)
+register_indication_attr_commands(app)
