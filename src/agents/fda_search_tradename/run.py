@@ -26,13 +26,14 @@ def run_fda_search_tradename(
     """Run the tradename worker; return + persist an answer for human/next agent."""
     rid = run_id or uuid.uuid4().hex[:12]
     with trace_span("worker", "fda_search_tradename", max_turns=max_turns):
-        text = run_tool_agent(
+        result = run_tool_agent(
             model=chat_model(),
             tools=tradename_worker_tools(),
             system=load_prompt("fda", "search_tradename_worker.md"),
             user=brief,
             max_turns=max_turns,
-        ).strip()
+        )
+        text = result.text.strip()
         status = AnswerStatus.OK if text else AnswerStatus.INCOMPLETE
         return write_agent_answer(
             AgentAnswer(
@@ -42,6 +43,7 @@ def run_fda_search_tradename(
                 answer=text or "(empty worker answer)",
                 status=status,
                 run_id=rid,
+                extras={"tools_called": result.tools_called},
             ),
             name_prefix=f"{rid}/fda_search_tradename",
             filename_stem="answer",

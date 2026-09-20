@@ -1,0 +1,24 @@
+{
+  "id": "hiv_drugs_by_tradename",
+  "brief": "Search HIV distinct drugs, and all their setids and original wording for indications and dosing forms and dosage administrations and adverse reactions, group by tradename",
+  "tags": ["hiv", "inner", "multi-attr", "discovery"],
+  "source_run_id": "eval-disc-i-hiv",
+  "max_loops": 3,
+  "planner": {
+    "allowed_workers": ["indication", "tradename", "id"],
+    "required_workers": ["indication"],
+    "required_attrs": [
+      "indication",
+      "dosage_forms",
+      "dosage_administrations",
+      "adverse_effects"
+    ]
+  },
+  "evidence_min_count": 10,
+  "final": {
+    "status_in": ["ok"],
+    "must_include": ["HIV", "Abacavir", "Set ID"],
+    "must_not_include": []
+  },
+  "must_reach_complete": false
+}

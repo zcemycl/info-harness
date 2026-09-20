@@ -40,8 +40,17 @@ uv run python src/main.py http ctg search-condition melanoma
 uv run python src/main.py http ctg search-by-compare-filters --filters-json '{"filters":null}'
 uv run python src/main.py http ta search immuno
 uv run python src/main.py http pubmed search "pembrolizumab melanoma"
+
+# Eval (FDA workers + inner specialist; fixtures + optional LLM judge)
+uv run python src/main.py eval --help
+uv run python src/main.py eval run --layer worker
+uv run python src/main.py eval run --layer inner
+uv run python src/main.py eval run --layer all
+uv run python src/main.py eval run --layer inner --case hiv_drugs_by_tradename
+uv run python src/main.py eval run --layer all --no-judge   # fixtures only
 ```
 
+Cases live under `src/examples/eval/{worker,inner}/`; reports under `data/eval/{suite_id}/`. Pass requires fixtures and (unless `--no-judge`) an LLM score ≥ `FDA_EVAL_PASS_THRESHOLD` (default `3.5`).
 
 CI runs the same lint suite via [`.github/workflows/lint.yml`](.github/workflows/lint.yml).
 See [`src/cli/readme.md`](src/cli/readme.md) for CLI conventions.
