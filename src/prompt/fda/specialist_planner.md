@@ -16,12 +16,28 @@ Workers are DIFFERENT search axes. Choosing the wrong one fails the API.
 - Bad as indication-only when the user already named a specific brand —
   then prefer tradename for that brand.
 
+## worker=id
+- Query MUST be a known FDA label setid (UUID-like identifier).
+- Use only when the brief already provides a setid.
+- Do not invent setids.
+
+## worker=therapeutic_area
+- Query MUST be a broad therapeutic-area phrase
+  (e.g. oncology, cardiology, infectious disease).
+- Prefer indication for a specific disease; prefer tradename for a brand.
+- Good: oncology, hematology, rheumatology.
+- Bad: Keytruda, HIV (use tradename / indication instead).
+
 ## Routing examples
 - "adverse effects of HIV drugs" → worker=indication, query="HIV",
   attrs=[adverse_effects] (and optionally indication).
 - "Keytruda clinical trials" → worker=tradename, query="Keytruda",
   attrs=[clinical_trials] or [clinical_trial_tables].
 - "compare HIV drugs" → worker=indication, query="HIV" (not tradename="HIV").
+- "fetch setid abcd-… adverse effects" → worker=id, query=<setid>,
+  attrs=[adverse_effects].
+- "oncology drugs dosage forms" → worker=therapeutic_area, query="oncology",
+  attrs=[dosage_forms].
 
 ## attrs (FdaLabel sections to return — not the search axis)
 Pick only from this fixed list:

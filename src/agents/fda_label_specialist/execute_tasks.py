@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
+from agents.fda_search_id.run_plan import run_id_plan
 from agents.fda_search_indication.run_plan import run_indication_plan
+from agents.fda_search_therapeutic_area.run_plan import run_therapeutic_area_plan
 from agents.fda_search_tradename.run_plan import run_tradename_plan
 from model.fda.fda_label_attr_page import FdaLabelAttrPage
 from model.research.worker_plan import FdaAttrName, FdaWorkerName, WorkerPlan
@@ -56,4 +58,8 @@ def _run_worker(plan: WorkerPlan) -> list[FdaLabelAttrPage[Any]]:
         return run_tradename_plan(plan)
     if plan.worker is FdaWorkerName.INDICATION:
         return run_indication_plan(plan)
+    if plan.worker is FdaWorkerName.ID:
+        return run_id_plan(plan)
+    if plan.worker is FdaWorkerName.THERAPEUTIC_AREA:
+        return run_therapeutic_area_plan(plan)
     raise ValueError(f"Unsupported worker: {plan.worker}")

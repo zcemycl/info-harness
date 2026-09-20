@@ -31,7 +31,7 @@ def run_fda_label_specialist(
     max_loops: int | None = None,
     run_id: str | None = None,
 ) -> FdaSpecialistResult:
-    """Inner PEWE loop dispatching tradename/indication workers."""
+    """Inner PEWE loop dispatching FDA axis workers."""
     limit = max_loops or int(os.getenv("FDA_SPECIALIST_MAX_LOOPS", "3"))
     rid = run_id or uuid.uuid4().hex[:12]
     diary: list[DiaryEntry] = []

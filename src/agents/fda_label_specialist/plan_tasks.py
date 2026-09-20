@@ -27,6 +27,8 @@ def plan_fda_tasks(
         "routing_reminder": (
             "worker=tradename → brand name only (Keytruda). "
             "worker=indication → disease/condition only (HIV, melanoma). "
+            "worker=id → FDA setid only. "
+            "worker=therapeutic_area → broad TA only (oncology). "
             "Never set worker=tradename with query=HIV."
         ),
         "latest_diary": diary[-1].model_dump(mode="json") if diary else None,

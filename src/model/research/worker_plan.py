@@ -14,6 +14,8 @@ class FdaWorkerName(StrEnum):
 
     TRADENAME = "tradename"
     INDICATION = "indication"
+    ID = "id"
+    THERAPEUTIC_AREA = "therapeutic_area"
 
 
 class WorkerPlan(BaseModel):
@@ -23,13 +25,16 @@ class WorkerPlan(BaseModel):
         description=(
             "Search axis: 'tradename' for drug brand names only "
             "(Keytruda, Opdivo); 'indication' for disease/condition "
-            "phrases only (HIV, melanoma). Never put a disease on tradename."
+            "phrases only (HIV, melanoma); 'id' for a known FDA setid; "
+            "'therapeutic_area' for broad TA text (oncology, cardiology). "
+            "Never put a disease on tradename or a brand on indication."
         )
     )
     query: str = Field(
         description=(
-            "Exact query for that axis: brand name if worker=tradename; "
-            "disease/condition if worker=indication. Example bad: "
+            "Exact query for that axis: brand if worker=tradename; "
+            "disease/condition if worker=indication; setid if worker=id; "
+            "TA phrase if worker=therapeutic_area. Example bad: "
             "worker=tradename query=HIV."
         )
     )
