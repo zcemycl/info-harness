@@ -1,4 +1,4 @@
-"""Thin CLI wrapper for FDA label indication search."""
+"""Thin CLI: indication search → adverse_effects attr page."""
 
 from __future__ import annotations
 
@@ -8,10 +8,12 @@ from cli.http.dump_json import dump_json
 from hc_http.fda._cache_key import DEFAULT_CACHE_KEY
 from hc_http.fda.search_by_indication import DEFAULT_SORT_BY
 from model.fda_scrape_versions import DEFAULT_SCRAPE_VERSION, FdaScrapeVersions
-from tools.fda.search_fdalabel_indication import search_fdalabel_indication
+from tools.fda.search_fdalabel_indication.adverse_effects import (
+    search_fdalabel_indication_adverse_effects,
+)
 
 
-def search_indication(
+def adverse_effects(
     indication: str = typer.Argument(..., help="Indication text to search"),
     version: str = typer.Option(
         DEFAULT_SCRAPE_VERSION,
@@ -21,7 +23,7 @@ def search_indication(
     ),
     maxn: int = typer.Option(30, "--maxn", help="Max candidates"),
     offset: int = typer.Option(0, "--offset", help="Result offset"),
-    limit: int = typer.Option(10, "--limit", help="Result limit"),
+    limit: int = typer.Option(5, "--limit", help="Result limit"),
     sort_by: str = typer.Option(
         DEFAULT_SORT_BY, "--sort-by", help="Sort order (e.g. relevance)"
     ),
@@ -29,9 +31,9 @@ def search_indication(
         DEFAULT_CACHE_KEY, "--cache-key", help="Server-side cache key"
     ),
 ) -> None:
-    """Search FDA labels by indication (HC API)."""
+    """Search by indication; return adverse_effects page."""
     try:
-        results = search_fdalabel_indication(
+        results = search_fdalabel_indication_adverse_effects(
             indication,
             versions=FdaScrapeVersions.all(version),
             maxn=maxn,

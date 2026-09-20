@@ -1,4 +1,4 @@
-"""Thin CLI wrapper for FDA label tradename search."""
+"""Thin CLI: tradename search → indication attr page."""
 
 from __future__ import annotations
 
@@ -6,10 +6,12 @@ import typer
 
 from cli.http.dump_json import dump_json
 from model.fda_scrape_versions import DEFAULT_SCRAPE_VERSION, FdaScrapeVersions
-from tools.fda.search_fdalabel_tradename import search_fdalabel_tradename
+from tools.fda.search_fdalabel_tradename.indication import (
+    search_fdalabel_tradename_indication,
+)
 
 
-def search_tradename(
+def indication(
     tradename: str = typer.Argument(..., help="Trade name to search"),
     version: str = typer.Option(
         DEFAULT_SCRAPE_VERSION,
@@ -19,11 +21,11 @@ def search_tradename(
     ),
     maxn: int = typer.Option(30, "--maxn", help="Max candidates"),
     offset: int = typer.Option(0, "--offset", help="Result offset"),
-    limit: int = typer.Option(10, "--limit", help="Result limit"),
+    limit: int = typer.Option(5, "--limit", help="Result limit"),
 ) -> None:
-    """Search FDA labels by tradename (HC API)."""
+    """Search by tradename; return indication page."""
     try:
-        results = search_fdalabel_tradename(
+        results = search_fdalabel_tradename_indication(
             tradename,
             versions=FdaScrapeVersions.all(version),
             maxn=maxn,

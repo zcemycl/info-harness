@@ -33,8 +33,8 @@ uv run python src/main.py cognito-login -u USERNAME -p PASSWORD
 
 # HC HTTP subgroups (mirrors hc-backend routers)
 uv run python src/main.py http --help
-uv run python src/main.py http fda search-tradename Keytruda
-uv run python src/main.py http fda search-indication melanoma
+uv run python src/main.py http fda search-tradename indication Keytruda
+uv run python src/main.py http fda search-indication indication melanoma
 uv run python src/main.py http fda search-by-compare-filters --filters-json '{"filters":null}'
 uv run python src/main.py http ctg search-condition melanoma
 uv run python src/main.py http ctg search-by-compare-filters --filters-json '{"filters":null}'
