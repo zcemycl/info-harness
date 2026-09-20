@@ -11,7 +11,9 @@ from tools.therapeutic_area.search_therapeutic_area import search_therapeutic_ar
 def search(
     q: str = typer.Argument(..., help="Therapeutic area query"),
     both_sides: bool = typer.Option(
-        False, "--both-sides", help="Match substring on both sides"
+        False,
+        "--both-sides",
+        help="false: prefix match (SQL LIKE q%); true: either side (SQL LIKE %q%)",
     ),
 ) -> None:
     """Autocomplete therapeutic area names (HC API)."""

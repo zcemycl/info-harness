@@ -10,7 +10,11 @@ def run_search_therapeutic_area(
     *,
     both_sides: bool = False,
 ) -> list[str]:
-    """GET /icd/search_therapeutic_area and return matching TA names."""
+    """GET /icd/search_therapeutic_area and return matching TA names.
+
+    both_sides=false → SQL LIKE q% (prefix only).
+    both_sides=true → SQL LIKE %q% (substring either side).
+    """
     data = hc_request_json(
         "GET",
         "/icd/search_therapeutic_area",
