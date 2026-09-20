@@ -32,7 +32,7 @@ override-dependencies = ["litellm==1.49.7"]
 
 [tool.uv.sources]
 litellm = { path = "vendor/litellm-1.49.7-py3-none-any.whl" }
-hc-datacore = { git = "ssh://git@github.com/zcemycl/hc-datacore.git", rev = "main" }
+hc-datacore = { git = "ssh://git@github.com/zcemycl/hc-datacore.git", rev = "fix/install-by-other-repos" }
 
 [dependency-groups]
 dev = [
