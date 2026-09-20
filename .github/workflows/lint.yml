@@ -2,8 +2,10 @@ name: Lint
 
 on:
   push:
-    branches: [main, master]
+    branches:
+      - "*"
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: lint-${{ github.workflow }}-${{ github.ref }}
