@@ -6,6 +6,8 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
+        # litellm 1.49.7 was removed from PyPI; vendored wheel is ~6MB
+        exclude: ^vendor/.*\.whl$
       - id: check-merge-conflict
       - id: check-toml
 
