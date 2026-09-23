@@ -5,15 +5,17 @@ from __future__ import annotations
 from langchain_core.tools import StructuredTool
 
 from agents.dump_tool_result import dump_tool_result
+from agents.fda_shared.extract_ctg_nct_links_tool import extract_ctg_nct_links_tool
 from model.fda.fda_attr_name import FdaAttrName
 from tools.fda.search_fdalabel_indication.attr_registry import INDICATION_ATTR_SEARCH
 
 
 def indication_worker_tools() -> list[StructuredTool]:
-    """Build one langchain tool per FdaLabel attribute."""
+    """Build one langchain tool per FdaLabel attribute plus NCT extract."""
     tools: list[StructuredTool] = []
     for attr, search in INDICATION_ATTR_SEARCH.items():
         tools.append(_tool_for(attr, search))
+    tools.append(extract_ctg_nct_links_tool())
     return tools
 
 

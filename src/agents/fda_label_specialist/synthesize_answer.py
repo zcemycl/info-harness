@@ -21,7 +21,10 @@ def synthesize_fda_answer(brief: str, evidence: list[EvidenceNote]) -> str:
                 "role": "system",
                 "content": (
                     "Answer the brief using only the evidence notes. "
-                    "Cite tradename and setid. Be concise."
+                    "Cite tradename and setid. Be concise. "
+                    "When NCT ids or CTG links appear in evidence, copy them "
+                    "exactly (clinicaltrials.gov/study/… URLs). "
+                    "Do not invent NCT ids or /ct2/show/ links."
                 ),
             },
             {

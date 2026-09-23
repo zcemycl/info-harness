@@ -61,6 +61,8 @@ uv run python src/main.py eval run --layer worker --case nct01564784_setup_condi
 uv run python src/main.py eval run --layer inner
 uv run python src/main.py eval run --layer all
 uv run python src/main.py eval run --layer inner --case hiv_drugs_by_tradename
+uv run python src/main.py eval run --layer worker --case besponsa_clinical_trials_nct
+uv run python src/main.py eval run --layer inner --case besponsa_clinical_trials_nct
 uv run python src/main.py eval run --layer all --no-judge   # fixtures only
 ```
 

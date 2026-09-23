@@ -10,6 +10,7 @@ from model.fda.fda_label_attr_page import FdaLabelAttrPage
 from model.fda.fda_label_section import FdaLabelSection
 from model.research.evidence_note import EvidenceNote
 from model.research.worker_plan import FdaAttrName, WorkerPlan
+from tools.fda.extract_ctg_nct_links import extract_ctg_nct_links
 
 
 def write_evidence_notes(
@@ -37,7 +38,13 @@ def write_evidence_notes(
 
 def _summary(attr: FdaAttrName, item: object) -> str:
     if isinstance(item, FdaLabelAttrHit):
-        return _value_summary(item.value)[:400]
+        raw = _value_summary(item.value)
+        excerpt = raw[:400]
+        links = extract_ctg_nct_links(raw)
+        if not links:
+            return excerpt
+        link_bits = "; ".join(f"{link.nctid} {link.ctg_url}" for link in links)
+        return f"{excerpt}\nCTG links: {link_bits}"
     return f"{attr.value} hit"
 
 
