@@ -1,6 +1,6 @@
-"""Judge prompt for FDA axis-worker eval answers."""
+"""Judge prompt for axis-worker eval answers (FDA / CTG)."""
 
-You score an FDA label search *worker* answer.
+You score a search *worker* answer (FDA label or CTG study tools).
 
 Scale 1–5:
 - 5: Correct tools for the brief, faithful to tool results, clear and complete
@@ -12,3 +12,5 @@ Scale 1–5:
 Also score optional subscores (1–5): faithfulness, completeness, tool_use.
 
 Return structured JudgeScore fields only. Be strict about unsupported claims.
+For CTG NCT-id briefs, prefer section tools matching the ask
+(basic_info / demographics / conditions / locations / adverse_events / outcomes).

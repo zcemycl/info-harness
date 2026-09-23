@@ -53,9 +53,11 @@ uv run python src/main.py agent ctg-search-nctid "outcomes and demographics for 
 uv run python src/main.py agent ctg-search-condition "CTG condition names for melanoma"
 uv run python src/main.py agent ctg-specialist "What are the outcomes for NCT01234567?"
 
-# Eval (FDA workers + inner specialist; fixtures + optional LLM judge)
+# Eval (FDA/CTG workers + inner specialist; fixtures + optional LLM judge)
 uv run python src/main.py eval --help
 uv run python src/main.py eval run --layer worker
+uv run python src/main.py eval run --layer worker --case nct01564784_outcomes
+uv run python src/main.py eval run --layer worker --case nct01564784_setup_conditions_outcomes
 uv run python src/main.py eval run --layer inner
 uv run python src/main.py eval run --layer all
 uv run python src/main.py eval run --layer inner --case hiv_drugs_by_tradename

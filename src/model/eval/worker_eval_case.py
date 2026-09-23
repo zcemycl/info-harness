@@ -4,15 +4,15 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from model.research.worker_plan import FdaWorkerName
+from model.eval.eval_worker_name import EvalWorkerName
 
 
 class WorkerEvalCase(BaseModel):
-    """One FDA axis-worker benchmark case."""
+    """One axis-worker benchmark case (FDA or CTG)."""
 
     id: str = Field(description="Stable case id (filename stem)")
     brief: str
-    worker: FdaWorkerName
+    worker: EvalWorkerName
     tags: list[str] = Field(default_factory=list)
     source_run_id: str | None = Field(
         default=None, description="Diary run id used to curate GT"

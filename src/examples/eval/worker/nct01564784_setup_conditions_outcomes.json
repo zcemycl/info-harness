@@ -1,0 +1,17 @@
+{
+  "id": "nct01564784_setup_conditions_outcomes",
+  "brief": "find base trial setup, conditions and outcomes for NCT01564784",
+  "worker": "nctid",
+  "tags": ["ctg", "nctid", "NCT01564784", "INO-VATE"],
+  "source_run_id": "eval-disc-w-nctid-setup",
+  "status_in": ["ok"],
+  "must_include": ["NCT01564784", "Acute Lymphoblastic"],
+  "must_not_include": [],
+  "expected_tools_any": [],
+  "expected_tools_all": [
+    "search_ctg_nctid_basic_info",
+    "search_ctg_nctid_conditions",
+    "search_ctg_nctid_outcomes"
+  ],
+  "min_answer_chars": 200
+}
