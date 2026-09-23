@@ -37,16 +37,21 @@ uv run python src/main.py http fda search-tradename indication Keytruda
 uv run python src/main.py http fda search-indication indication melanoma
 uv run python src/main.py http fda search-by-compare-filters --filters-json '{"filters":null}'
 uv run python src/main.py http ctg search-condition melanoma
+uv run python src/main.py http ctg search-nctid basic-info NCT01234567
+uv run python src/main.py http ctg search-nctid outcomes NCT01234567
 uv run python src/main.py http ctg search-by-compare-filters --filters-json '{"filters":null}'
 uv run python src/main.py http ta search immuno
 uv run python src/main.py http ta search immuno --both-sides   # %q% vs default q%
 uv run python src/main.py http pubmed search "pembrolizumab melanoma"
 
-# Agents (FDA label workers / specialist; ICD TA worker / specialist)
+# Agents (FDA / ICD / CTG workers + specialists)
 uv run python src/main.py agent --help
 uv run python src/main.py agent icd-ta-worker "find TA names for immuno"
 uv run python src/main.py agent icd-ta-specialist "What ICD therapeutic areas match oncology?"
 uv run python src/main.py agent fda-label-specialist "What are the FDA-approved indications for Keytruda?"
+uv run python src/main.py agent ctg-search-nctid "outcomes and demographics for NCT01234567"
+uv run python src/main.py agent ctg-search-condition "CTG condition names for melanoma"
+uv run python src/main.py agent ctg-specialist "What are the outcomes for NCT01234567?"
 
 # Eval (FDA workers + inner specialist; fixtures + optional LLM judge)
 uv run python src/main.py eval --help

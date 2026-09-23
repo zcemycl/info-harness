@@ -2,6 +2,9 @@
 
 import typer
 
+from cli.agent.ctg_search_condition import ctg_search_condition
+from cli.agent.ctg_search_nctid import ctg_search_nctid
+from cli.agent.ctg_specialist import ctg_specialist
 from cli.agent.fda_label_specialist import fda_label_specialist
 from cli.agent.fda_search_id import fda_search_id
 from cli.agent.fda_search_indication import fda_search_indication
@@ -12,7 +15,7 @@ from cli.agent.icd_ta_worker import icd_ta_worker
 
 app = typer.Typer(
     name="agent",
-    help="Run FDA/ICD search workers and specialist loops.",
+    help="Run FDA/ICD/CTG search workers and specialist loops.",
     add_completion=False,
     no_args_is_help=True,
 )
@@ -24,3 +27,6 @@ app.command("fda-search-therapeutic-area")(fda_search_therapeutic_area)
 app.command("fda-label-specialist")(fda_label_specialist)
 app.command("icd-ta-worker")(icd_ta_worker)
 app.command("icd-ta-specialist")(icd_ta_specialist)
+app.command("ctg-search-nctid")(ctg_search_nctid)
+app.command("ctg-search-condition")(ctg_search_condition)
+app.command("ctg-specialist")(ctg_specialist)
