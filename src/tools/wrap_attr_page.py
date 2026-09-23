@@ -1,18 +1,18 @@
-"""Wrap projected CTG hits into a CtgAttrPage with next_offset."""
+"""Wrap projected hits into an AttrPage with next_offset."""
 
 from __future__ import annotations
 
 from typing import TypeVar
 
-from model.ctg.ctg_attr_page import CtgAttrPage
-from tools.ctg.next_page_offset import next_page_offset
+from model.attr_page import AttrPage
+from tools.next_page_offset import next_page_offset
 
 T = TypeVar("T")
 
 
-def wrap_attr_page(items: list[T], *, offset: int, limit: int) -> CtgAttrPage[T]:
+def wrap_attr_page(items: list[T], *, offset: int, limit: int) -> AttrPage[T]:
     """Attach pagination metadata to a list of slim hits."""
-    return CtgAttrPage(
+    return AttrPage(
         items=items,
         offset=offset,
         limit=limit,

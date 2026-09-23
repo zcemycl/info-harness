@@ -9,8 +9,8 @@ from model.ctg.ctg_attr_page import CtgAttrPage
 from model.fda_scrape_versions import DEFAULT_SCRAPE_VERSION
 from tools.ctg.get_ctg_by_nctids import get_ctg_by_nctids
 from tools.ctg.project_attr_hit import project_attr_hit
-from tools.ctg.wrap_attr_page import wrap_attr_page
 from tools.trace_call import trace_info, trace_span
+from tools.wrap_attr_page import wrap_attr_page
 
 
 def search_ctg_nctid_attr(

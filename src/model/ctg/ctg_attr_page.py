@@ -1,21 +1,7 @@
-"""Paginated wrapper for slim CTG attribute hits."""
+"""CTG alias for the shared AttrPage model."""
 
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+from model.attr_page import AttrPage as CtgAttrPage
 
-from pydantic import BaseModel, Field
-
-T = TypeVar("T")
-
-
-class CtgAttrPage(BaseModel, Generic[T]):
-    """One page of slim section hits with next-offset hint."""
-
-    items: list[T] = Field(description="Hits for this page")
-    offset: int = Field(ge=0, description="Request offset")
-    limit: int = Field(ge=1, description="Request page size")
-    next_offset: int | None = Field(
-        default=None,
-        description="Pass as offset to fetch the next page; null when done",
-    )
+__all__ = ["CtgAttrPage"]
