@@ -13,10 +13,11 @@ from cli.agent.fda_search_therapeutic_area import fda_search_therapeutic_area
 from cli.agent.fda_search_tradename import fda_search_tradename
 from cli.agent.icd_ta_specialist import icd_ta_specialist
 from cli.agent.icd_ta_worker import icd_ta_worker
+from cli.agent.research import research
 
 app = typer.Typer(
     name="agent",
-    help="Run FDA/ICD/CTG search workers and specialist loops.",
+    help="Run FDA/ICD/CTG workers, specialists, and research outer loop.",
     add_completion=False,
     no_args_is_help=True,
 )
@@ -32,3 +33,4 @@ app.command("ctg-search-nctid")(ctg_search_nctid)
 app.command("ctg-search-condition")(ctg_search_condition)
 app.command("ctg-resolve-trial")(ctg_resolve_trial)
 app.command("ctg-specialist")(ctg_specialist)
+app.command("research")(research)

@@ -54,6 +54,7 @@ uv run python src/main.py agent ctg-search-nctid "outcomes and demographics for 
 uv run python src/main.py agent ctg-search-condition "CTG condition names for melanoma"
 uv run python src/main.py agent ctg-resolve-trial "resolve INO-VATE to an NCT id"
 uv run python src/main.py agent ctg-specialist "What are the outcomes for NCT01234567?"
+uv run python src/main.py agent research "Keytruda indications and related pivotal trials"
 
 # Eval (FDA/CTG workers + inner specialist; fixtures + optional LLM judge)
 uv run python src/main.py eval --help
