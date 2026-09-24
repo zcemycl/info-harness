@@ -6,6 +6,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field, model_validator
 
+from model.pubmed.is_placeholder_pmid import is_placeholder_pmid
 from model.pubmed.pubmed_attr_name import PubmedAttrName
 
 
@@ -46,4 +47,6 @@ class PubmedWorkerPlan(BaseModel):
             raise ValueError(
                 f"worker=id query must be a numeric PMID, got {self.query!r}"
             )
+        if is_placeholder_pmid(pmid):
+            raise ValueError(f"worker=id rejected placeholder PMID: {pmid}")
         return self

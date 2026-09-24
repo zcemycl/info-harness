@@ -18,6 +18,7 @@ from tools.fda.extract_study_mentions import extract_study_mentions
 from tools.fda.extract_table_placeholders import extract_table_placeholders
 from tools.fda.format_fda_table import format_fda_table
 from tools.fda.section_table_pairs import is_section_with_tables, is_tables_attr
+from tools.fda.trial_keys_from_text import trial_keys_from_text
 
 _FDA_SUMMARY_MAX = 400
 _TABLE_SUMMARY_MAX = 1200
@@ -90,6 +91,11 @@ def _unit_summary(
     extras: list[str] = []
     if is_section_with_tables(attr):
         extras.extend(_section_extras(raw))
+    if is_tables_attr(attr):
+        caption = getattr(unit, "caption", None) or ""
+        keys = trial_keys_from_text(f"{caption}\n{raw}")
+        if keys:
+            extras.append("trial_keys: " + ", ".join(keys))
     if attr is FdaAttrName.ADVERSE_EFFECT_TABLES and isinstance(unit, FdaLabelTable):
         kind = classify_ae_table_kind(unit.caption)
         extras.append(f"kind={kind.value}")

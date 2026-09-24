@@ -71,6 +71,9 @@ Prefer 1–2 attrs per task; page with next_offset if more is needed.
 - Completeness: ≥1 pivotal trial (NCT or protocol) per subindication /
   `<title>` block under clinical_trials; for AE tables cover both
   **ae_reaction** and **laboratory** kinds when both exist on the label.
+- When synthesizing, prefer **comparison tables** (shared AE/outcome rows
+  across arms or trial_keys) — do not dump every source table. Keep
+  outcomes with that trial's ae_reaction + laboratory when grouping.
 
 ## NCT ids from clinical_trials
 - After clinical_trials / clinical_trial_tables, extract NCTs only via

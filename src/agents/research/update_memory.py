@@ -11,6 +11,7 @@ from model.research.research_memory import (
 )
 from model.research.research_pack import ResearchPack
 from tools.research.collect_nct_ids import collect_nct_ids
+from tools.research.collect_pmids_from_pack import collect_pmids_from_pack
 
 
 def update_research_memory(
@@ -36,6 +37,11 @@ def update_research_memory(
     if pack_ncts:
         lessons = list(
             dict.fromkeys([*lessons, "Known NCT ids: " + ", ".join(pack_ncts)])
+        )
+    pack_pmids = collect_pmids_from_pack(pack)
+    if pack_pmids:
+        lessons = list(
+            dict.fromkeys([*lessons, "Known PMIDs: " + ", ".join(pack_pmids[:20])])
         )
 
     force = set(evaluation.force_rerun_workstream_ids)

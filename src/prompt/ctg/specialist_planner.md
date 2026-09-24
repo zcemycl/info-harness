@@ -31,8 +31,11 @@ Workers are DIFFERENT search axes. Choosing the wrong one fails the API.
   modules HC may not store).
 - Prefer fetch when the brief needs latest study info, HC looked incomplete,
   or **references / PubMed PMIDs** (references is fetch-only).
-- Prefer nctid when stored HC sections are enough and freshness is not
-  required.
+- When the brief mentions pubmed, literature, PMID, paper, or publication,
+  **always** plan worker=fetch attrs=[references] for each known NCT
+  (limit=20). Do not stop at worker=nctid outcomes/AEs for a literature ask.
+- Prefer nctid when stored HC sections are enough and freshness / references
+  are not required.
 - attrs MUST list one or more sections (HC set plus references).
 - Do not invent NCT ids.
 

@@ -34,6 +34,12 @@ continue/replan: next_briefs for CTG must name the verbatim NCT ids in
 focus and seed_queries (nctid/fetch), not "search for more NCTs by drug
 name."
 
+If CTG (or memory) lists real PMIDs but no pubmed answer fetched those
+ids, decision must be continue: next_briefs for pubmed must name the
+verbatim PMIDs in focus and seed_queries. Never invent substitute PMIDs.
+If the user asked for literature and no PMIDs exist yet, continue with
+CTG fetch references (not pubmed by drug name).
+
 Always prefer live CT.gov when it has posted outcomes/AEs. If CT.gov is
 thin/empty for an NCT, do **not** treat FDA tables as obsolete — keep FDA
 as fda_fallback in gaps/lessons and ensure the writer retains FDA numbers.

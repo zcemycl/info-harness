@@ -28,9 +28,15 @@ from model.research.research_result import ResearchResult
 from tools.diary.write_agent_answer import write_agent_answer
 from tools.diary.write_research_memory import write_research_memory
 from tools.diary.write_research_result import write_research_result
+from tools.research.annotate_ctg_for_references import annotate_ctg_for_references
 from tools.research.collect_nct_ids_from_pack import collect_nct_ids_from_pack
+from tools.research.collect_pmids_from_pack import collect_pmids_from_pack
 from tools.research.enforce_ctg_nct_coverage import enforce_ctg_nct_coverage
+from tools.research.enforce_ctg_references import enforce_ctg_references
+from tools.research.enforce_pubmed_pmid_coverage import enforce_pubmed_pmid_coverage
 from tools.research.enrich_ctg_briefs import enrich_ctg_briefs
+from tools.research.enrich_pubmed_briefs import enrich_pubmed_briefs
+from tools.research.gate_pubmed_briefs import gate_pubmed_briefs
 from tools.trace_call import trace_info, trace_span
 
 DEFAULT_MAX_LOOPS = int(os.getenv("RESEARCH_MAX_LOOPS", "2"))
@@ -77,14 +83,17 @@ async def run_research(
                     stage_answers=stage_answers,
                 )
                 if prior_pack is not None:
-                    plan = plan.model_copy(
-                        update={
-                            "selected": enrich_ctg_briefs(
-                                plan.selected,
-                                collect_nct_ids_from_pack(prior_pack),
-                            )
-                        }
+                    selected = enrich_ctg_briefs(
+                        plan.selected,
+                        collect_nct_ids_from_pack(prior_pack),
                     )
+                    selected = enrich_pubmed_briefs(
+                        selected,
+                        collect_pmids_from_pack(prior_pack),
+                    )
+                    selected = gate_pubmed_briefs(selected, user_brief=brief)
+                    selected = annotate_ctg_for_references(selected, user_brief=brief)
+                    plan = plan.model_copy(update={"selected": selected})
                 pack = await run_executor_stage(
                     brief,
                     loop=loop,
@@ -116,6 +125,8 @@ async def run_research(
                 )
                 evaluation = enforce_continue_on_gaps(evaluation, pack)
                 evaluation = enforce_ctg_nct_coverage(evaluation, pack)
+                evaluation = enforce_ctg_references(evaluation, pack, user_brief=brief)
+                evaluation = enforce_pubmed_pmid_coverage(evaluation, pack)
                 memory = update_research_memory(memory, pack, evaluation, loop=loop)
                 write_research_memory(memory, name_prefix=f"{rid}/research/loop-{loop}")
                 prior_pack = pack

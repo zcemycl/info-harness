@@ -20,6 +20,7 @@ from model.research.agent_answer import (
     AnswerStatus,
 )
 from model.research.diary_entry import DiaryDecision, DiaryEntry
+from tools.ctg.ensure_fetch_references_tasks import ensure_fetch_references_tasks
 from tools.diary.write_agent_answer import write_agent_answer
 from tools.diary.write_ctg_specialist_result import write_ctg_specialist_result
 from tools.trace_call import trace_info, trace_span
@@ -52,7 +53,14 @@ def run_ctg_specialist(
                     run_id=rid,
                     stage_answers=stage_answers,
                 )
-                if planned.tasks:
+                tasks = ensure_fetch_references_tasks(planned.tasks, brief)
+                if len(tasks) != len(planned.tasks):
+                    trace_info(
+                        "fetch references ensured",
+                        before=len(planned.tasks),
+                        after=len(tasks),
+                    )
+                if tasks:
                     (
                         nctid_triples,
                         condition_pairs,
@@ -61,7 +69,7 @@ def run_ctg_specialist(
                     ) = run_executor_stage(
                         brief,
                         loop=loop,
-                        tasks=planned.tasks,
+                        tasks=tasks,
                         run_id=rid,
                         stage_answers=stage_answers,
                     )
@@ -86,7 +94,7 @@ def run_ctg_specialist(
                 )
             if entry.decision is DiaryDecision.COMPLETE:
                 break
-            if entry.decision is DiaryDecision.REPLAN and not planned.tasks:
+            if entry.decision is DiaryDecision.REPLAN and not tasks:
                 continue
 
         final_answer = _finalize_answer(brief, evidence, rid, loops_run, stage_answers)

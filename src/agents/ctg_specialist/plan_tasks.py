@@ -30,11 +30,13 @@ def plan_ctg_tasks(
         "ncts_in_brief": ncts_in_brief,
         "routing_reminder": (
             "If ncts_in_brief is non-empty, plan worker=nctid or fetch for "
-            "EACH listed NCT with attrs (basic_info/outcomes/adverse_events/"
-            "demographics/conditions/locations; references via fetch when "
-            "thin). Do NOT use worker=condition or resolve_trial when NCT "
-            "ids are already present. Never invent NCT ids. Never use demo "
-            "placeholders (NCT01234567 / NCT01234569 / ascending digits)."
+            "EACH listed NCT. When the brief asks for PubMed / literature / "
+            "PMIDs / references, you MUST include worker=fetch with "
+            "attrs=[references] (limit=20) for each NCT — references is "
+            "fetch-only; worker=nctid cannot return PMIDs. Otherwise prefer "
+            "attrs the brief needs (basic_info/outcomes/adverse_events/…). "
+            "Do NOT use worker=condition or resolve_trial when NCT ids are "
+            "already present. Never invent NCT ids or demo placeholders."
         ),
         "latest_diary": diary[-1].model_dump(mode="json") if diary else None,
         "evidence_tail": compact_evidence_notes(evidence),

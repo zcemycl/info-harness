@@ -24,6 +24,8 @@ from tools.diary.write_agent_answer import write_agent_answer
 from tools.diary.write_pubmed_specialist_result import (
     write_pubmed_specialist_result,
 )
+from tools.pubmed.filter_allowed_pmid_tasks import filter_allowed_pmid_tasks
+from tools.research.collect_pmids import collect_pmids
 from tools.trace_call import trace_info, trace_span
 
 
@@ -54,14 +56,24 @@ def run_pubmed_specialist(
                     run_id=rid,
                     stage_answers=stage_answers,
                 )
-                if planned.tasks:
-                    triples, loop_failures = run_executor_stage(
+                tasks, rejected = filter_allowed_pmid_tasks(planned.tasks, brief)
+                loop_failures.extend(rejected)
+                if rejected:
+                    trace_info("pmid filter", rejected=len(rejected), kept=len(tasks))
+                if not collect_pmids(brief):
+                    loop_failures.append(
+                        "No PMIDs in brief; emit zero tasks "
+                        "(need CTG references or user-supplied PMIDs)."
+                    )
+                if tasks:
+                    triples, exec_failures = run_executor_stage(
                         brief,
                         loop=loop,
-                        tasks=planned.tasks,
+                        tasks=tasks,
                         run_id=rid,
                         stage_answers=stage_answers,
                     )
+                    loop_failures.extend(exec_failures)
                     run_writer_stage(
                         brief,
                         loop=loop,
@@ -81,7 +93,7 @@ def run_pubmed_specialist(
                 )
             if entry.decision is DiaryDecision.COMPLETE:
                 break
-            if entry.decision is DiaryDecision.REPLAN and not planned.tasks:
+            if entry.decision is DiaryDecision.REPLAN and not tasks:
                 continue
 
         final_answer = _finalize_answer(brief, evidence, rid, loops_run, stage_answers)
@@ -106,10 +118,17 @@ def _finalize_answer(
     stage_answers: list[AgentAnswer],
 ) -> AgentAnswer:
     with trace_span("stage", "synthesize"):
-        text = synthesize_pubmed_answer(brief, evidence).strip()
-        status = AnswerStatus.OK if text and evidence else AnswerStatus.INCOMPLETE
-        if not text:
-            text = "No evidence collected; unable to answer the brief."
+        if not evidence:
+            text = (
+                "No PMIDs were supplied from the brief or upstream CTG "
+                "references; PubMed was not queried. Do not invent PMIDs."
+            )
+            status = AnswerStatus.INCOMPLETE
+        else:
+            text = synthesize_pubmed_answer(brief, evidence).strip()
+            status = AnswerStatus.OK if text else AnswerStatus.INCOMPLETE
+            if not text:
+                text = "No evidence collected; unable to answer the brief."
         return write_agent_answer(
             AgentAnswer(
                 agent="pubmed_specialist",

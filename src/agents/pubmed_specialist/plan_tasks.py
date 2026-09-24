@@ -26,10 +26,12 @@ def plan_pubmed_tasks(
         "brief": brief,
         "loop": loop,
         "routing_reminder": (
-            "worker=id → numeric PMID + attrs. "
+            "worker=id → numeric PMID + attrs. Query MUST appear "
+            "verbatim in the brief (Known PMIDs / seed_queries). "
+            "If the brief has no PMID, emit zero tasks — never invent. "
             "Prefer abstract (+ citation) when present; if abstract is "
             "null/empty, fetch citation + mesh/keywords/chemicals/"
-            "publication_types/secondary_ids. Never invent PMIDs."
+            "publication_types/secondary_ids."
         ),
         "latest_diary": diary[-1].model_dump(mode="json") if diary else None,
         "evidence_tail": compact_evidence_notes(evidence),
