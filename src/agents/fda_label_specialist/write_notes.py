@@ -16,9 +16,11 @@ from tools.fda.classify_ae_table_kind import classify_ae_table_kind
 from tools.fda.extract_ctg_nct_links import extract_ctg_nct_links
 from tools.fda.extract_study_mentions import extract_study_mentions
 from tools.fda.extract_table_placeholders import extract_table_placeholders
+from tools.fda.format_fda_table import format_fda_table
 from tools.fda.section_table_pairs import is_section_with_tables, is_tables_attr
 
 _FDA_SUMMARY_MAX = 400
+_TABLE_SUMMARY_MAX = 1200
 
 
 def write_evidence_notes(
@@ -30,31 +32,48 @@ def write_evidence_notes(
     notes: list[EvidenceNote] = []
     for plan, attr, page in triples:
         for item in page.items:
-            summary, artifact_path, total = _item_summary(attr, item, run_id=run_id)
-            notes.append(
-                EvidenceNote(
-                    worker=plan.worker,
-                    attr=attr,
-                    query=plan.query,
-                    label_id=item.id,
-                    setid=item.setid,
-                    tradename=item.tradename,
-                    summary=summary,
-                    artifact_path=artifact_path,
-                    total_chars=total,
-                    offset=page.offset,
-                    next_offset=page.next_offset,
+            for unit in _units(attr, item):
+                summary, artifact_path, total = _unit_summary(
+                    attr, item, unit, run_id=run_id
                 )
-            )
+                notes.append(
+                    EvidenceNote(
+                        worker=plan.worker,
+                        attr=attr,
+                        query=plan.query,
+                        label_id=item.id,
+                        setid=item.setid,
+                        tradename=item.tradename,
+                        summary=summary,
+                        artifact_path=artifact_path,
+                        total_chars=total,
+                        offset=page.offset,
+                        next_offset=page.next_offset,
+                    )
+                )
     return notes
 
 
-def _item_summary(
-    attr: FdaAttrName, item: object, *, run_id: str
+def _units(attr: FdaAttrName, item: object) -> list[object]:
+    if not isinstance(item, FdaLabelAttrHit):
+        return [None]
+    if is_tables_attr(attr):
+        tables = _iter_tables(item.value)
+        return list(tables) if tables else [item.value]
+    return [item.value]
+
+
+def _unit_summary(
+    attr: FdaAttrName,
+    item: object,
+    unit: object,
+    *,
+    run_id: str,
 ) -> tuple[str, str | None, int | None]:
     if not isinstance(item, FdaLabelAttrHit):
         return f"{attr.value} hit", None, None
-    raw = _value_text(attr, item.value)
+    raw = _value_text(attr, unit)
+    max_chars = _TABLE_SUMMARY_MAX if is_tables_attr(attr) else _FDA_SUMMARY_MAX
     summary, artifact_path, total = summarize_evidence_value(
         raw,
         run_id=run_id,
@@ -64,20 +83,16 @@ def _item_summary(
             "label_id": item.id,
             "setid": str(item.setid),
             "tradename": item.tradename,
+            "table_id": getattr(unit, "id", None),
         },
-        max_chars=_FDA_SUMMARY_MAX,
+        max_chars=max_chars,
     )
     extras: list[str] = []
     if is_section_with_tables(attr):
         extras.extend(_section_extras(raw))
-    if attr is FdaAttrName.ADVERSE_EFFECT_TABLES:
-        kind_line = _ae_table_kind_line(item.value)
-        if kind_line:
-            extras.append(kind_line)
-    if is_tables_attr(attr):
-        caption_line = _table_caption_line(item.value)
-        if caption_line:
-            extras.insert(0, caption_line)
+    if attr is FdaAttrName.ADVERSE_EFFECT_TABLES and isinstance(unit, FdaLabelTable):
+        kind = classify_ae_table_kind(unit.caption)
+        extras.append(f"kind={kind.value}")
     if extras:
         summary = "\n".join([summary, *extras])
     return summary, artifact_path, total
@@ -87,14 +102,14 @@ def _section_extras(raw: str) -> list[str]:
     extras: list[str] = []
     refs = extract_table_placeholders(raw)
     if refs:
-        bits = []
-        for ref in refs:
-            label = (
+        bits = [
+            (
                 f"Table {ref.table_number}→ph{ref.placeholder_index}"
                 if ref.table_number is not None
                 else f"ph{ref.placeholder_index}"
             )
-            bits.append(label)
+            for ref in refs
+        ]
         extras.append("Table placeholders: " + "; ".join(bits))
     links = extract_ctg_nct_links(raw)
     if links:
@@ -108,25 +123,6 @@ def _section_extras(raw: str) -> list[str]:
             + "; ".join(f"{m.raw} ({m.kind.value})" for m in mentions[:12])
         )
     return extras
-
-
-def _ae_table_kind_line(value: object) -> str | None:
-    tables = _iter_tables(value)
-    if not tables:
-        return None
-    kinds = []
-    for table in tables[:8]:
-        kind = classify_ae_table_kind(table.caption)
-        kinds.append(f"{(table.caption or '')[:40]} kind={kind.value}")
-    return "AE table kinds: " + "; ".join(kinds)
-
-
-def _table_caption_line(value: object) -> str | None:
-    tables = _iter_tables(value)
-    if not tables:
-        return None
-    caps = [t.caption for t in tables[:6] if t.caption]
-    return "Tables: " + "; ".join(caps) if caps else None
 
 
 def _iter_tables(value: object) -> list[FdaLabelTable]:
@@ -155,15 +151,15 @@ def _value_text(attr: FdaAttrName, value: object) -> str:
         return ""
     if isinstance(value, str):
         return value
+    if isinstance(value, FdaLabelTable):
+        return format_fda_table(value)
     if isinstance(value, list):
+        if is_tables_attr(attr):
+            return "\n\n".join(format_fda_table(entry) for entry in value[:8])
         parts: list[str] = []
-        for entry in value[: 8 if is_tables_attr(attr) else 3]:
+        for entry in value[:3]:
             if isinstance(entry, FdaLabelSection):
                 parts.append(entry.content or "")
-            elif isinstance(entry, FdaLabelTable):
-                parts.append(entry.caption or "")
-            elif hasattr(entry, "caption"):
-                parts.append(str(getattr(entry, "caption", "")))
             elif hasattr(entry, "name"):
                 parts.append(str(getattr(entry, "name", "")))
             else:
