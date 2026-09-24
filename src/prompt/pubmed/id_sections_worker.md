@@ -26,6 +26,8 @@ Responsive attr choice (prefer 1–2):
 Rules:
 - Tool argument `pmid` must be a real numeric PMID.
 - Prefer limit=20. If next_offset is set and more units are needed, page.
+- Evidence notes are summaries; use `read_evidence_artifact` with
+  `artifact_path` to pull more text when a deeper excerpt is needed.
 - Never invent attribute/tool names; only call the tools above.
 - Always end with a clear answer for a human or the next agent: cite PMID
   with short excerpts. Do not stop after tool calls only.

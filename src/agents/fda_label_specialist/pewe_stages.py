@@ -96,7 +96,7 @@ def run_writer_stage(
 ) -> list[EvidenceNote]:
     """Write evidence notes and emit a next-agent answer."""
     with trace_span("stage", "writer"):
-        notes = write_evidence_notes(pairs)
+        notes = write_evidence_notes(pairs, run_id=run_id)
         evidence.extend(notes)
         stage_answers.append(
             emit_stage_answer(

@@ -112,7 +112,9 @@ def run_writer_stage(
 ) -> list[CtgEvidenceNote]:
     """Write evidence notes and emit a next-agent answer."""
     with trace_span("stage", "writer"):
-        notes = write_ctg_evidence_notes(nctid_triples, condition_pairs, resolve_pairs)
+        notes = write_ctg_evidence_notes(
+            nctid_triples, condition_pairs, resolve_pairs, run_id=run_id
+        )
         evidence.extend(notes)
         stage_answers.append(
             emit_stage_answer(

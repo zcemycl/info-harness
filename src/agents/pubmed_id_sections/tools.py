@@ -5,6 +5,7 @@ from __future__ import annotations
 from langchain_core.tools import StructuredTool
 
 from agents.dump_tool_result import dump_tool_result
+from agents.shared.read_evidence_artifact_tool import read_evidence_artifact_tool
 from model.pubmed.pubmed_attr_name import PubmedAttrName
 from tools.pubmed.id_sections.attr_registry import ID_ATTR_SECTIONS
 
@@ -14,6 +15,7 @@ def id_sections_worker_tools() -> list[StructuredTool]:
     tools: list[StructuredTool] = []
     for attr, fetch in ID_ATTR_SECTIONS.items():
         tools.append(_tool_for(attr, fetch))
+    tools.append(read_evidence_artifact_tool())
     return tools
 
 

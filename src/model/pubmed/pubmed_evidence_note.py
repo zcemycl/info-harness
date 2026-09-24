@@ -21,7 +21,13 @@ class PubmedEvidenceNote(BaseModel):
         default_factory=list,
         description="Secondary ids / NCT / DOI strings when attr=secondary_ids",
     )
-    summary: str = Field(description="Full unit text for the evaluator (no truncation)")
+    summary: str = Field(description="Capped text excerpt for the evaluator")
+    artifact_path: str | None = Field(
+        default=None, description="Diary path to full value when summary is capped"
+    )
+    total_chars: int | None = Field(
+        default=None, description="Full value length before summary cap"
+    )
     offset: int = Field(default=0, ge=0)
     next_offset: int | None = Field(
         default=None, description="Pagination cursor from the source page"

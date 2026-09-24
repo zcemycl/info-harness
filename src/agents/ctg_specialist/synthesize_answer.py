@@ -6,6 +6,7 @@ import json
 
 from agents.chat_model import chat_model
 from model.ctg.ctg_evidence_note import CtgEvidenceNote
+from tools.evidence.compact_evidence_notes import compact_evidence_notes
 
 
 def synthesize_ctg_answer(brief: str, evidence: list[CtgEvidenceNote]) -> str:
@@ -13,7 +14,7 @@ def synthesize_ctg_answer(brief: str, evidence: list[CtgEvidenceNote]) -> str:
     llm = chat_model(model_env="OPENROUTER_FDA_SPECIALIST_MODEL")
     payload = {
         "brief": brief,
-        "evidence": [n.model_dump(mode="json") for n in evidence],
+        "evidence": compact_evidence_notes(evidence, tail=None),
     }
     response = llm.invoke(
         [

@@ -31,6 +31,12 @@ class CtgEvidenceNote(BaseModel):
         ),
     )
     summary: str = Field(description="Short text excerpt for the evaluator")
+    artifact_path: str | None = Field(
+        default=None, description="Diary path to full value when summary is capped"
+    )
+    total_chars: int | None = Field(
+        default=None, description="Full value length before summary cap"
+    )
     offset: int = Field(default=0, ge=0)
     next_offset: int | None = Field(
         default=None, description="Pagination cursor from the source page"

@@ -20,6 +20,8 @@ You also have `extract_study_mentions(text)`: extract sponsor protocol ids
 Rules:
 - Tool argument `tradename` must be a real product name, never a disease.
 - Prefer limit=5. If next_offset is set and more evidence is needed, page.
+- Evidence notes are summaries; use `read_evidence_artifact` with
+  `artifact_path` to pull more text when a deeper excerpt is needed.
 - Never invent attribute/tool names; only call the tools above.
 - For NCT / CTG links: call `search_fdalabel_tradename_clinical_trials`, then
   pass section `content` into `extract_ctg_nct_links`. Cite nctid + ctg_url

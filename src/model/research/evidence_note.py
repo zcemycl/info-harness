@@ -19,6 +19,12 @@ class EvidenceNote(BaseModel):
     setid: UUID
     tradename: str
     summary: str = Field(description="Short text excerpt for the evaluator")
+    artifact_path: str | None = Field(
+        default=None, description="Diary path to full value when summary is capped"
+    )
+    total_chars: int | None = Field(
+        default=None, description="Full value length before summary cap"
+    )
     offset: int = Field(ge=0)
     next_offset: int | None = Field(
         default=None, description="Pagination cursor from the source page"

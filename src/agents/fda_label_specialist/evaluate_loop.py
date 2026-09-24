@@ -8,6 +8,7 @@ from agents.chat_model import chat_model
 from model.research.diary_entry import DiaryEntry
 from model.research.evidence_note import EvidenceNote
 from prompt.load_prompt import load_prompt
+from tools.evidence.compact_evidence_notes import compact_evidence_notes
 
 
 def evaluate_fda_loop(
@@ -23,7 +24,7 @@ def evaluate_fda_loop(
     payload = {
         "brief": brief,
         "loop": loop,
-        "evidence": [n.model_dump(mode="json") for n in evidence],
+        "evidence": compact_evidence_notes(evidence),
         "failures": failures or [],
     }
     result = structured.invoke(

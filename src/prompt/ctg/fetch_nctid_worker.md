@@ -39,6 +39,8 @@ Rules:
   one AE row, one basic_info field, …) — not a single giant blob.
 - Prefer limit=20 for references/outcomes/adverse_events. If next_offset is
   set and more evidence is needed, page with that offset until done.
+- Evidence notes are summaries; use `read_evidence_artifact` with
+  `artifact_path` to pull more text when a deeper excerpt is needed.
 - Never invent attribute/tool names; only call the tools above.
 - Always end with a clear answer for a human or the next agent: cite
   nctid with short excerpts (and PMIDs when using references). Do not stop

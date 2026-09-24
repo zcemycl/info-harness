@@ -7,6 +7,7 @@ from langchain_core.tools import StructuredTool
 from agents.dump_tool_result import dump_tool_result
 from agents.fda_shared.extract_ctg_nct_links_tool import extract_ctg_nct_links_tool
 from agents.fda_shared.extract_study_mentions_tool import extract_study_mentions_tool
+from agents.shared.read_evidence_artifact_tool import read_evidence_artifact_tool
 from model.fda.fda_attr_name import FdaAttrName
 from tools.fda.search_fdalabel_therapeutic_area.attr_registry import (
     THERAPEUTIC_AREA_ATTR_SEARCH,
@@ -20,6 +21,7 @@ def therapeutic_area_worker_tools() -> list[StructuredTool]:
         tools.append(_tool_for(attr, search))
     tools.append(extract_ctg_nct_links_tool())
     tools.append(extract_study_mentions_tool())
+    tools.append(read_evidence_artifact_tool())
     return tools
 
 

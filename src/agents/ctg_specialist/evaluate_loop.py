@@ -8,6 +8,7 @@ from agents.chat_model import chat_model
 from model.ctg.ctg_evidence_note import CtgEvidenceNote
 from model.research.diary_entry import DiaryEntry
 from prompt.load_prompt import load_prompt
+from tools.evidence.compact_evidence_notes import compact_evidence_notes
 
 
 def evaluate_ctg_loop(
@@ -23,7 +24,7 @@ def evaluate_ctg_loop(
     payload = {
         "brief": brief,
         "loop": loop,
-        "evidence": [n.model_dump(mode="json") for n in evidence],
+        "evidence": compact_evidence_notes(evidence),
         "failures": failures or [],
     }
     result = structured.invoke(

@@ -9,6 +9,7 @@ from model.research.diary_entry import DiaryEntry
 from model.research.evidence_note import EvidenceNote
 from model.research.planner_output import PlannerOutput
 from prompt.load_prompt import load_prompt
+from tools.evidence.compact_evidence_notes import compact_evidence_notes
 
 
 def plan_fda_tasks(
@@ -32,7 +33,7 @@ def plan_fda_tasks(
             "Never set worker=tradename with query=HIV."
         ),
         "latest_diary": diary[-1].model_dump(mode="json") if diary else None,
-        "evidence_tail": [n.model_dump(mode="json") for n in evidence[-20:]],
+        "evidence_tail": compact_evidence_notes(evidence),
     }
     result = structured.invoke(
         [
