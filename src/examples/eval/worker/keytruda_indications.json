@@ -1,0 +1,13 @@
+{
+  "id": "keytruda_indications",
+  "brief": "What are the FDA-approved indications for Keytruda?",
+  "worker": "tradename",
+  "tags": ["keytruda", "indication", "discovery"],
+  "source_run_id": "eval-disc-w-tradename",
+  "status_in": ["ok"],
+  "must_include": ["Keytruda", "melanoma", "9333c79b-d487-4538-a9f0-71b91a02b287"],
+  "must_not_include": [],
+  "expected_tools_any": ["search_fdalabel_tradename_indication"],
+  "expected_tools_all": [],
+  "min_answer_chars": 200
+}

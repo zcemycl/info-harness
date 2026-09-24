@@ -2,12 +2,10 @@ name: Lint
 
 on:
   push:
-    branches: [main, master]
+    branches:
+      - "*"
   pull_request:
-
-concurrency:
-  group: lint-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -26,7 +24,9 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv sync --group dev
+        run: |
+          git config --global url."https://x-token-auth:${{ secrets.PRIVATE_REPO_TOKEN }}@github.com".insteadOf "ssh://git@github.com"
+          uv sync --group dev
 
       - name: Black
         run: uv run black --check src tests

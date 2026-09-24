@@ -1,0 +1,1 @@
+"""PubMed domain Pydantic models."""

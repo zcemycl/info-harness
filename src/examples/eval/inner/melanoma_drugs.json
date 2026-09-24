@@ -1,0 +1,19 @@
+{
+  "id": "melanoma_drugs",
+  "brief": "List FDA-approved drugs for melanoma and briefly note their indication focus (e.g. BRAF, PD-1).",
+  "tags": ["melanoma", "inner", "discovery"],
+  "source_run_id": "eval-disc-i-melanoma",
+  "max_loops": 3,
+  "planner": {
+    "allowed_workers": ["indication", "tradename", "therapeutic_area"],
+    "required_workers": ["indication"],
+    "required_attrs": ["indication"]
+  },
+  "evidence_min_count": 5,
+  "final": {
+    "status_in": ["ok"],
+    "must_include": ["melanoma"],
+    "must_not_include": []
+  },
+  "must_reach_complete": false
+}

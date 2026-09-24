@@ -1,0 +1,13 @@
+{
+  "id": "keytruda_by_setid",
+  "brief": "For setid 9333c79b-d487-4538-a9f0-71b91a02b287 (Keytruda), summarize the indication section.",
+  "worker": "id",
+  "tags": ["keytruda", "setid", "discovery"],
+  "source_run_id": "eval-disc-w-id",
+  "status_in": ["ok"],
+  "must_include": ["Keytruda", "9333c79b-d487-4538-a9f0-71b91a02b287", "melanoma"],
+  "must_not_include": [],
+  "expected_tools_any": ["search_fdalabel_id_indication"],
+  "expected_tools_all": [],
+  "min_answer_chars": 200
+}

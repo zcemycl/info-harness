@@ -1,0 +1,20 @@
+{
+  "id": "besponsa_clinical_trials_nct",
+  "brief": "What are Besponsa's clinical trial NCT ids and their ClinicalTrials.gov links?",
+  "worker": "tradename",
+  "tags": ["besponsa", "clinical_trials", "nct", "ctg_link"],
+  "source_run_id": "eval-besponsa-ct-nct-w",
+  "status_in": ["ok"],
+  "must_include": [
+    "Besponsa",
+    "NCT01564784",
+    "https://clinicaltrials.gov/study/NCT01564784"
+  ],
+  "must_not_include": [],
+  "expected_tools_any": [],
+  "expected_tools_all": [
+    "search_fdalabel_tradename_clinical_trials",
+    "extract_ctg_nct_links"
+  ],
+  "min_answer_chars": 80
+}

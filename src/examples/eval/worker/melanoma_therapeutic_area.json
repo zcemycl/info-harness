@@ -1,0 +1,13 @@
+{
+  "id": "melanoma_therapeutic_area",
+  "brief": "Search therapeutic area 'melanoma' and summarize FDA label indications for a few returned drugs.",
+  "worker": "therapeutic_area",
+  "tags": ["melanoma", "therapeutic_area", "discovery", "soft"],
+  "source_run_id": "eval-disc-w-ta2",
+  "status_in": ["ok"],
+  "must_include": [],
+  "must_not_include": [],
+  "expected_tools_any": ["search_fdalabel_therapeutic_area_indication"],
+  "expected_tools_all": [],
+  "min_answer_chars": 100
+}

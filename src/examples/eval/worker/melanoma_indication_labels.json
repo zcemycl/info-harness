@@ -1,0 +1,13 @@
+{
+  "id": "melanoma_indication_labels",
+  "brief": "Which FDA labels mention melanoma as an indication? Summarize key drugs and indications.",
+  "worker": "indication",
+  "tags": ["melanoma", "indication", "discovery"],
+  "source_run_id": "eval-disc-w-indication",
+  "status_in": ["ok"],
+  "must_include": ["melanoma"],
+  "must_not_include": [],
+  "expected_tools_any": ["search_fdalabel_indication_indication"],
+  "expected_tools_all": [],
+  "min_answer_chars": 200
+}

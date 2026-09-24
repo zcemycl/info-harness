@@ -1,0 +1,35 @@
+"""Thin CLI wrapper for FDA setid autocomplete."""
+
+from __future__ import annotations
+
+import typer
+
+from cli.http.dump_json import dump_json
+from hc_http.fda._cache_key import DEFAULT_CACHE_KEY
+from model.fda_scrape_versions import DEFAULT_SCRAPE_VERSION, FdaScrapeVersions
+from tools.fda.autocomplete_fdalabel_setid import autocomplete_fdalabel_setid
+
+
+def autocomplete_setid(
+    setid: str = typer.Argument(..., help="Setid prefix/query"),
+    version: str = typer.Option(
+        DEFAULT_SCRAPE_VERSION,
+        "--version",
+        "-v",
+        help="Scrape version applied to every cache/version field",
+    ),
+    cache_key: str = typer.Option(
+        DEFAULT_CACHE_KEY, "--cache-key", help="Server-side cache key"
+    ),
+) -> None:
+    """Autocomplete FDA setids (HC API)."""
+    try:
+        results = autocomplete_fdalabel_setid(
+            setid,
+            versions=FdaScrapeVersions.all(version),
+            cache_key=cache_key,
+        )
+    except (FileNotFoundError, RuntimeError, ValueError) as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(dump_json(results))

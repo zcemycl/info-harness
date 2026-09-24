@@ -1,0 +1,8 @@
+{
+  "id": "resolve_b1931022",
+  "query": "B1931022",
+  "expect_status": "resolved",
+  "expect_nctid": "NCT01564784",
+  "expect_sources_any": ["ctgov_id"],
+  "notes": "Pfizer org study id for INO-VATE / Besponsa pivotal"
+}
