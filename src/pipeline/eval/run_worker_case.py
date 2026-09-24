@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from agents.ctg_resolve_trial.run import run_ctg_resolve_trial
 from agents.ctg_search_condition.run import run_ctg_search_condition
 from agents.ctg_search_nctid.run import run_ctg_search_nctid
 from agents.fda_search_id.run import run_fda_search_id
@@ -30,4 +31,6 @@ def run_worker_eval_case(
         return run_ctg_search_nctid(case.brief, run_id=rid)
     if case.worker is EvalWorkerName.CONDITION:
         return run_ctg_search_condition(case.brief, run_id=rid)
+    if case.worker is EvalWorkerName.RESOLVE_TRIAL:
+        return run_ctg_resolve_trial(case.brief, run_id=rid)
     raise ValueError(f"Unknown worker: {case.worker}")

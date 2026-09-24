@@ -20,6 +20,7 @@ from model.ctg.ctg_attr_page import CtgAttrPage
 from model.ctg.ctg_evidence_note import CtgEvidenceNote
 from model.ctg.ctg_planner_output import CtgPlannerOutput
 from model.ctg.ctg_worker_plan import CtgWorkerPlan
+from model.ctg.resolved_trial import ResolvedTrial
 from model.research.agent_answer import AgentAnswer, AnswerStatus
 from model.research.diary_entry import DiaryEntry
 from tools.diary.write_diary import write_diary
@@ -27,6 +28,7 @@ from tools.trace_call import trace_info, trace_span
 
 NctidTriple = tuple[CtgWorkerPlan, CtgAttrName, CtgAttrPage[Any]]
 ConditionPair = tuple[CtgWorkerPlan, list[str]]
+ResolvePair = tuple[CtgWorkerPlan, ResolvedTrial]
 
 
 def run_planner_stage(
@@ -66,30 +68,35 @@ def run_executor_stage(
     tasks: list[CtgWorkerPlan],
     run_id: str,
     stage_answers: list[AgentAnswer],
-) -> tuple[list[NctidTriple], list[ConditionPair], list[str]]:
+) -> tuple[list[NctidTriple], list[ConditionPair], list[ResolvePair], list[str]]:
     """Execute tasks and emit a next-agent answer."""
     with trace_span("stage", "executor", tasks=len(tasks)):
-        nctid_triples, condition_pairs, failures = execute_ctg_tasks(tasks)
+        nctid_triples, condition_pairs, resolve_pairs, failures = execute_ctg_tasks(
+            tasks
+        )
         if failures:
             trace_info("failures", count=len(failures))
-        has_hits = bool(nctid_triples or condition_pairs)
+        has_hits = bool(nctid_triples or condition_pairs or resolve_pairs)
         status = AnswerStatus.ERROR if failures and not has_hits else AnswerStatus.OK
         stage_answers.append(
             emit_stage_answer(
                 agent="executor",
                 brief=brief,
-                answer=executor_answer_text(nctid_triples, condition_pairs, failures),
+                answer=executor_answer_text(
+                    nctid_triples, condition_pairs, resolve_pairs, failures
+                ),
                 run_id=run_id,
                 loop=loop,
                 status=status,
                 extras={
                     "nctid_pages": len(nctid_triples),
                     "condition_searches": len(condition_pairs),
+                    "resolve_searches": len(resolve_pairs),
                     "failures": failures,
                 },
             )
         )
-        return nctid_triples, condition_pairs, failures
+        return nctid_triples, condition_pairs, resolve_pairs, failures
 
 
 def run_writer_stage(
@@ -98,13 +105,14 @@ def run_writer_stage(
     loop: int,
     nctid_triples: list[NctidTriple],
     condition_pairs: list[ConditionPair],
+    resolve_pairs: list[ResolvePair],
     evidence: list[CtgEvidenceNote],
     run_id: str,
     stage_answers: list[AgentAnswer],
 ) -> list[CtgEvidenceNote]:
     """Write evidence notes and emit a next-agent answer."""
     with trace_span("stage", "writer"):
-        notes = write_ctg_evidence_notes(nctid_triples, condition_pairs)
+        notes = write_ctg_evidence_notes(nctid_triples, condition_pairs, resolve_pairs)
         evidence.extend(notes)
         stage_answers.append(
             emit_stage_answer(

@@ -31,7 +31,7 @@ def run_ctg_specialist(
     max_loops: int | None = None,
     run_id: str | None = None,
 ) -> CtgSpecialistResult:
-    """PEWE loop dispatching CTG nctid / condition workers."""
+    """PEWE loop dispatching CTG nctid / condition / resolve_trial workers."""
     limit = max_loops or int(os.getenv("CTG_SPECIALIST_MAX_LOOPS", "3"))
     rid = run_id or uuid.uuid4().hex[:12]
     diary: list[DiaryEntry] = []
@@ -53,7 +53,12 @@ def run_ctg_specialist(
                     stage_answers=stage_answers,
                 )
                 if planned.tasks:
-                    nctid_triples, condition_pairs, loop_failures = run_executor_stage(
+                    (
+                        nctid_triples,
+                        condition_pairs,
+                        resolve_pairs,
+                        loop_failures,
+                    ) = run_executor_stage(
                         brief,
                         loop=loop,
                         tasks=planned.tasks,
@@ -65,6 +70,7 @@ def run_ctg_specialist(
                         loop=loop,
                         nctid_triples=nctid_triples,
                         condition_pairs=condition_pairs,
+                        resolve_pairs=resolve_pairs,
                         evidence=evidence,
                         run_id=rid,
                         stage_answers=stage_answers,

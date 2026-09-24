@@ -14,3 +14,4 @@ class EvalWorkerName(StrEnum):
     THERAPEUTIC_AREA = "therapeutic_area"
     NCTID = "nctid"
     CONDITION = "condition"
+    RESOLVE_TRIAL = "resolve_trial"

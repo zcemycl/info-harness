@@ -14,6 +14,7 @@ class CtgWorkerName(StrEnum):
 
     NCTID = "nctid"
     CONDITION = "condition"
+    RESOLVE_TRIAL = "resolve_trial"
 
 
 class CtgWorkerPlan(BaseModel):
@@ -22,33 +23,42 @@ class CtgWorkerPlan(BaseModel):
     worker: CtgWorkerName = Field(
         description=(
             "Search axis: 'nctid' for a known NCT######## id; "
-            "'condition' to autocomplete CTG condition name strings. "
-            "Never invent NCT IDs."
+            "'condition' to autocomplete CTG condition name strings; "
+            "'resolve_trial' to map study name/protocol id → NCT via "
+            "CT.gov + PubMed. Never invent NCT IDs."
         )
     )
     query: str = Field(
         description=(
             "Exact query for that axis: NCT######## if worker=nctid; "
-            "condition phrase if worker=condition."
+            "condition phrase if worker=condition; study name / acronym / "
+            "sponsor protocol id if worker=resolve_trial."
         )
     )
     attrs: list[CtgAttrName] = Field(
         default_factory=list,
         description=(
             "CtgByNctidRow sections for worker=nctid (required, min 1). "
-            "Ignored for worker=condition. Values: basic_info, demographics, "
-            "conditions, locations, adverse_events, outcomes."
+            "Ignored for worker=condition and resolve_trial. Values: "
+            "basic_info, demographics, conditions, locations, "
+            "adverse_events, outcomes."
         ),
     )
     both_sides: bool = Field(
         default=False,
         description=(
             "worker=condition only: false → SQL LIKE q% (prefix); "
-            "true → SQL LIKE %q% (substring either side). Ignored for nctid."
+            "true → SQL LIKE %q% (substring either side). Ignored for "
+            "nctid and resolve_trial."
         ),
     )
     offset: int = Field(default=0, ge=0, description="Pagination offset (nctid)")
-    limit: int = Field(default=5, ge=1, le=20, description="Page size (nctid)")
+    limit: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Page size (nctid / resolve_trial)",
+    )
 
     @model_validator(mode="after")
     def _require_attrs_for_nctid(self) -> CtgWorkerPlan:

@@ -37,6 +37,7 @@ uv run python src/main.py http fda search-tradename indication Keytruda
 uv run python src/main.py http fda search-indication indication melanoma
 uv run python src/main.py http fda search-by-compare-filters --filters-json '{"filters":null}'
 uv run python src/main.py http ctg search-condition melanoma
+uv run python src/main.py http ctg resolve-trial "INO-VATE"
 uv run python src/main.py http ctg search-nctid basic-info NCT01234567
 uv run python src/main.py http ctg search-nctid outcomes NCT01234567
 uv run python src/main.py http ctg search-by-compare-filters --filters-json '{"filters":null}'
@@ -51,6 +52,7 @@ uv run python src/main.py agent icd-ta-specialist "What ICD therapeutic areas ma
 uv run python src/main.py agent fda-label-specialist "What are the FDA-approved indications for Keytruda?"
 uv run python src/main.py agent ctg-search-nctid "outcomes and demographics for NCT01234567"
 uv run python src/main.py agent ctg-search-condition "CTG condition names for melanoma"
+uv run python src/main.py agent ctg-resolve-trial "resolve INO-VATE to an NCT id"
 uv run python src/main.py agent ctg-specialist "What are the outcomes for NCT01234567?"
 
 # Eval (FDA/CTG workers + inner specialist; fixtures + optional LLM judge)

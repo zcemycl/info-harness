@@ -21,7 +21,8 @@ def synthesize_ctg_answer(brief: str, evidence: list[CtgEvidenceNote]) -> str:
                 "role": "system",
                 "content": (
                     "Answer the brief using only the evidence notes. "
-                    "Cite nctid (and setid when present) or concrete "
+                    "Cite nctid (and setid when present), resolve_trial "
+                    "outcomes (resolved NCT or unresolved), or concrete "
                     "condition names from evidence. Do not invent. Be concise."
                 ),
             },

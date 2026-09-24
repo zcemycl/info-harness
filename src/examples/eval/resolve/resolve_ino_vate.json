@@ -1,0 +1,8 @@
+{
+  "id": "resolve_ino_vate",
+  "query": "INO-VATE",
+  "expect_status": "resolved",
+  "expect_nctid": "NCT01564784",
+  "expect_sources_any": ["pubmed", "ctgov_titles", "ctgov_id"],
+  "notes": "Publication acronym; MEDLINE SI links to NCT01564784"
+}

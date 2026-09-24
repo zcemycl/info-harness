@@ -1,0 +1,8 @@
+{
+  "id": "resolve_cna30024",
+  "query": "CNA30024",
+  "expect_status": "unresolved",
+  "expect_nctid": null,
+  "must_not_invent_nct": true,
+  "notes": "GSK protocol never registered on ClinicalTrials.gov"
+}

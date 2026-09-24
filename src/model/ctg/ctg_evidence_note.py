@@ -24,7 +24,10 @@ class CtgEvidenceNote(BaseModel):
     )
     names: list[str] = Field(
         default_factory=list,
-        description="Condition name hits when worker=condition",
+        description=(
+            "Condition name hits when worker=condition; "
+            "alias expansions when worker=resolve_trial"
+        ),
     )
     summary: str = Field(description="Short text excerpt for the evaluator")
     offset: int = Field(default=0, ge=0)

@@ -33,6 +33,8 @@ Workers are DIFFERENT search axes. Choosing the wrong one fails the API.
   attrs=[adverse_effects] (and optionally indication).
 - "Keytruda clinical trials" → worker=tradename, query="Keytruda",
   attrs=[clinical_trials] or [clinical_trial_tables].
+  Workers should extract NCT links and non-NCT study mentions
+  (protocol ids / acronyms) from clinical_trials text.
 - "compare HIV drugs" → worker=indication, query="HIV" (not tradename="HIV").
 - "fetch setid abcd-… adverse effects" → worker=id, query=<setid>,
   attrs=[adverse_effects].
