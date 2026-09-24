@@ -16,7 +16,7 @@ class CtgEvidenceNote(BaseModel):
     worker: CtgWorkerName
     query: str
     attr: CtgAttrName | None = Field(
-        default=None, description="Section attr when worker=nctid"
+        default=None, description="Section attr when worker=nctid or fetch"
     )
     nctid: str | None = Field(default=None, description="NCT id when known")
     setid: UUID | str | None = Field(
@@ -26,7 +26,8 @@ class CtgEvidenceNote(BaseModel):
         default_factory=list,
         description=(
             "Condition name hits when worker=condition; "
-            "alias expansions when worker=resolve_trial"
+            "alias expansions when worker=resolve_trial; "
+            "PMIDs when attr=references"
         ),
     )
     summary: str = Field(description="Short text excerpt for the evaluator")

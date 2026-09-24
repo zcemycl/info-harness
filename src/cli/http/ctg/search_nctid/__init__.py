@@ -8,7 +8,7 @@ from cli.http.ctg.search_nctid.register_attr_commands import (
 
 app = typer.Typer(
     name="search-nctid",
-    help="Search CTG studies by NCT id (slim section pages).",
+    help="Search HC-stored CTG studies by NCT id (slim section pages).",
     add_completion=False,
     no_args_is_help=True,
 )

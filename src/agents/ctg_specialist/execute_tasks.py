@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from agents.ctg_fetch.run_plan import run_fetch_plan
 from agents.ctg_resolve_trial.run_plan import run_resolve_trial_plan
 from agents.ctg_search_condition.run_plan import run_condition_plan
 from agents.ctg_search_nctid.run_plan import run_nctid_plan
@@ -28,7 +29,21 @@ def execute_ctg_tasks(
     failures: list[str] = []
     for plan in tasks:
         if plan.worker is CtgWorkerName.NCTID:
-            _run_nctid(plan, nctid_triples, failures)
+            _run_section_worker(
+                plan,
+                nctid_triples,
+                failures,
+                worker_label="nctid",
+                run_plan=run_nctid_plan,
+            )
+        elif plan.worker is CtgWorkerName.FETCH:
+            _run_section_worker(
+                plan,
+                nctid_triples,
+                failures,
+                worker_label="fetch",
+                run_plan=run_fetch_plan,
+            )
         elif plan.worker is CtgWorkerName.CONDITION:
             _run_condition(plan, condition_pairs, failures)
         elif plan.worker is CtgWorkerName.RESOLVE_TRIAL:
@@ -38,15 +53,18 @@ def execute_ctg_tasks(
     return nctid_triples, condition_pairs, resolve_pairs, failures
 
 
-def _run_nctid(
+def _run_section_worker(
     plan: CtgWorkerPlan,
     triples: list[NctidTriple],
     failures: list[str],
+    *,
+    worker_label: str,
+    run_plan: object,
 ) -> None:
     for attr in plan.attrs:
         with trace_span(
             "worker",
-            "nctid",
+            worker_label,
             query=plan.query,
             attr=attr.value,
             offset=plan.offset,
@@ -54,9 +72,12 @@ def _run_nctid(
         ):
             single = plan.model_copy(update={"attrs": [attr]})
             try:
-                pages = run_nctid_plan(single)
+                pages = run_plan(single)  # type: ignore[operator]
             except (RuntimeError, ValueError) as exc:
-                msg = f"worker=nctid query={plan.query!r} attr={attr.value}: {exc}"
+                msg = (
+                    f"worker={worker_label} query={plan.query!r} "
+                    f"attr={attr.value}: {exc}"
+                )
                 failures.append(msg)
                 trace_info("worker failed", error=str(exc))
                 continue

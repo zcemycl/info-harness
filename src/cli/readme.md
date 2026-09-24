@@ -15,9 +15,12 @@ uv run python src/main.py http ctg search-condition melanoma
 uv run python src/main.py http ctg resolve-trial "INO-VATE"
 uv run python src/main.py http ctg search-nctid basic-info NCT01234567
 uv run python src/main.py http ctg search-nctid outcomes NCT01234567
+uv run python src/main.py http ctg fetch-nctid basic-info NCT01234567
+uv run python src/main.py http ctg fetch-nctid references NCT01234567
 uv run python src/main.py http ta search immuno
 uv run python src/main.py http pubmed search "pembrolizumab"
 uv run python src/main.py agent ctg-search-nctid "outcomes for NCT01234567"
+uv run python src/main.py agent ctg-fetch "latest status and PubMed refs for NCT01234567"
 uv run python src/main.py agent ctg-search-condition "melanoma condition names"
 uv run python src/main.py agent ctg-resolve-trial "resolve INO-VATE to an NCT"
 uv run python src/main.py agent ctg-specialist "outcomes for NCT01234567"
@@ -29,7 +32,8 @@ uv run python src/main.py agent ctg-specialist "outcomes for NCT01234567"
 - One Typer command per file under `src/cli/`.
 - HTTP CLIs live under `src/cli/http/<domain>/` and are mounted as `main.py http <domain> <command>`.
 - Attr-scoped FDA searches are grouped as `http fda search-tradename|search-indication|search-id <attr>`.
-- Attr-scoped CTG searches are grouped as `http ctg search-nctid <attr>` (`basic-info`, `demographics`, `conditions`, `locations`, `adverse-events`, `outcomes`).
+- Attr-scoped CTG **HC** searches: `http ctg search-nctid <attr>` (`basic-info`, `demographics`, `conditions`, `locations`, `adverse-events`, `outcomes`).
+- Attr-scoped CTG **live** fetch: `http ctg fetch-nctid <attr>` (same sections plus `references` for PMIDs / see-also links).
 - CTG resolve: `http ctg resolve-trial` maps study names / protocol ids → NCT via CT.gov + PubMed.
-- CTG agents: `ctg-search-nctid`, `ctg-search-condition`, `ctg-resolve-trial`, `ctg-specialist`.
+- CTG agents: `ctg-search-nctid` (HC), `ctg-fetch` (live CT.gov), `ctg-search-condition`, `ctg-resolve-trial`, `ctg-specialist`.
 - Command bodies stay thin — call into `tools/` (preferred) or `hc_http/`.

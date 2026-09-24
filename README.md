@@ -40,6 +40,8 @@ uv run python src/main.py http ctg search-condition melanoma
 uv run python src/main.py http ctg resolve-trial "INO-VATE"
 uv run python src/main.py http ctg search-nctid basic-info NCT01234567
 uv run python src/main.py http ctg search-nctid outcomes NCT01234567
+uv run python src/main.py http ctg fetch-nctid basic-info NCT01234567   # live CT.gov
+uv run python src/main.py http ctg fetch-nctid references NCT01234567  # PMIDs / see-also
 uv run python src/main.py http ctg search-by-compare-filters --filters-json '{"filters":null}'
 uv run python src/main.py http ta search immuno
 uv run python src/main.py http ta search immuno --both-sides   # %q% vs default q%
@@ -51,6 +53,7 @@ uv run python src/main.py agent icd-ta-worker "find TA names for immuno"
 uv run python src/main.py agent icd-ta-specialist "What ICD therapeutic areas match oncology?"
 uv run python src/main.py agent fda-label-specialist "What are the FDA-approved indications for Keytruda?"
 uv run python src/main.py agent ctg-search-nctid "outcomes and demographics for NCT01234567"
+uv run python src/main.py agent ctg-fetch "latest status and PubMed refs for NCT01234567"
 uv run python src/main.py agent ctg-search-condition "CTG condition names for melanoma"
 uv run python src/main.py agent ctg-resolve-trial "resolve INO-VATE to an NCT id"
 uv run python src/main.py agent ctg-specialist "What are the outcomes for NCT01234567?"

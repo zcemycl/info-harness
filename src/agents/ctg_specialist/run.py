@@ -31,7 +31,7 @@ def run_ctg_specialist(
     max_loops: int | None = None,
     run_id: str | None = None,
 ) -> CtgSpecialistResult:
-    """PEWE loop dispatching CTG nctid / condition / resolve_trial workers."""
+    """PEWE loop dispatching CTG nctid / fetch / condition / resolve_trial workers."""
     limit = max_loops or int(os.getenv("CTG_SPECIALIST_MAX_LOOPS", "3"))
     rid = run_id or uuid.uuid4().hex[:12]
     diary: list[DiaryEntry] = []

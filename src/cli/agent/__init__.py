@@ -2,6 +2,7 @@
 
 import typer
 
+from cli.agent.ctg_fetch import ctg_fetch
 from cli.agent.ctg_resolve_trial import ctg_resolve_trial
 from cli.agent.ctg_search_condition import ctg_search_condition
 from cli.agent.ctg_search_nctid import ctg_search_nctid
@@ -30,6 +31,7 @@ app.command("fda-label-specialist")(fda_label_specialist)
 app.command("icd-ta-worker")(icd_ta_worker)
 app.command("icd-ta-specialist")(icd_ta_specialist)
 app.command("ctg-search-nctid")(ctg_search_nctid)
+app.command("ctg-fetch")(ctg_fetch)
 app.command("ctg-search-condition")(ctg_search_condition)
 app.command("ctg-resolve-trial")(ctg_resolve_trial)
 app.command("ctg-specialist")(ctg_specialist)

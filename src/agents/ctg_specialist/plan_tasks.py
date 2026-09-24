@@ -25,7 +25,8 @@ def plan_ctg_tasks(
         "brief": brief,
         "loop": loop,
         "routing_reminder": (
-            "worker=nctid → NCT######## only, with attrs. "
+            "worker=nctid → NCT######## + HC attrs. "
+            "worker=fetch → NCT######## live CT.gov (incl. references). "
             "worker=condition → condition phrase autocomplete (both_sides). "
             "Never invent NCT ids."
         ),

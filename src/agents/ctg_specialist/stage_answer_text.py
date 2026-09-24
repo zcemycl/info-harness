@@ -30,6 +30,12 @@ def planner_answer_text(planned: CtgPlannerOutput) -> str:
             lines.append(
                 f"- worker=resolve_trial query={task.query!r} " f"limit={task.limit}"
             )
+        elif task.worker is CtgWorkerName.FETCH:
+            lines.append(
+                f"- worker=fetch query={task.query!r} "
+                f"attrs={[a.value for a in task.attrs]} "
+                f"offset={task.offset} limit={task.limit}"
+            )
         else:
             lines.append(
                 f"- worker=nctid query={task.query!r} "
@@ -50,7 +56,7 @@ def executor_answer_text(
     lines = [f"Fetched {total} result set(s)."]
     for plan, attr, page in nctid_triples:
         lines.append(
-            f"- nctid/{attr.value} query={plan.query!r} "
+            f"- {plan.worker.value}/{attr.value} query={plan.query!r} "
             f"items={len(page.items)} next_offset={page.next_offset}"
         )
     for plan, names in condition_pairs:
