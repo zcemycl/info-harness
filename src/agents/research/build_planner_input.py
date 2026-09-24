@@ -9,6 +9,7 @@ from model.research.diary_entry import DiaryEntry
 from model.research.research_eval_result import ResearchEvalResult
 from model.research.research_memory import ResearchMemory
 from model.research.specialist_kind import SpecialistKind
+from tools.research.collect_nct_ids_from_memory import collect_nct_ids_from_memory
 
 
 def build_planner_input(
@@ -24,6 +25,7 @@ def build_planner_input(
         "brief": brief,
         "loop": loop,
         "available_specialists": [k.value for k in SpecialistKind],
+        "known_ncts": collect_nct_ids_from_memory(memory),
         "latest_diary": diary[-1].model_dump(mode="json") if diary else None,
         "diary_tail": [e.model_dump(mode="json") for e in diary[-5:]],
         "memory": memory.model_dump(mode="json"),
@@ -36,6 +38,7 @@ def build_planner_input(
             "avoid_rejected_directions": memory.rejected_directions,
             "open_gaps": memory.open_gaps,
             "lessons": memory.lessons,
+            "ctg_must_list_known_ncts_in_focus_and_seeds": True,
         },
     }
     if eval_feedback is not None:

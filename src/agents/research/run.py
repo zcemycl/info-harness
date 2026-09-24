@@ -28,6 +28,9 @@ from model.research.research_result import ResearchResult
 from tools.diary.write_agent_answer import write_agent_answer
 from tools.diary.write_research_memory import write_research_memory
 from tools.diary.write_research_result import write_research_result
+from tools.research.collect_nct_ids_from_pack import collect_nct_ids_from_pack
+from tools.research.enforce_ctg_nct_coverage import enforce_ctg_nct_coverage
+from tools.research.enrich_ctg_briefs import enrich_ctg_briefs
 from tools.trace_call import trace_info, trace_span
 
 DEFAULT_MAX_LOOPS = int(os.getenv("RESEARCH_MAX_LOOPS", "2"))
@@ -73,6 +76,15 @@ async def run_research(
                     run_id=rid,
                     stage_answers=stage_answers,
                 )
+                if prior_pack is not None:
+                    plan = plan.model_copy(
+                        update={
+                            "selected": enrich_ctg_briefs(
+                                plan.selected,
+                                collect_nct_ids_from_pack(prior_pack),
+                            )
+                        }
+                    )
                 pack = await run_executor_stage(
                     brief,
                     loop=loop,
@@ -103,6 +115,7 @@ async def run_research(
                     stage_answers=stage_answers,
                 )
                 evaluation = enforce_continue_on_gaps(evaluation, pack)
+                evaluation = enforce_ctg_nct_coverage(evaluation, pack)
                 memory = update_research_memory(memory, pack, evaluation, loop=loop)
                 write_research_memory(memory, name_prefix=f"{rid}/research/loop-{loop}")
                 prior_pack = pack

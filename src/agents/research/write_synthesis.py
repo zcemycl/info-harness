@@ -8,6 +8,7 @@ from agents.chat_model import chat_model
 from model.research.research_pack import ResearchPack
 from model.research.research_plan import ResearchPlan
 from prompt.load_prompt import load_prompt
+from tools.research.prefer_ctg_or_fda import prefer_ctg_or_fda
 
 
 def write_synthesis(
@@ -20,6 +21,7 @@ def write_synthesis(
     payload = {
         "brief": brief,
         "plan": plan.model_dump(mode="json"),
+        "nct_source_priority": prefer_ctg_or_fda(pack),
         "outcomes": [
             {
                 "workstream_id": o.workstream_id,

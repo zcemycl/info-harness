@@ -12,14 +12,19 @@ def project_medline_section(record: MedlineRecord, attr: PubmedAttrName) -> Any:
     """Return the raw section value for one attr (pre-expand)."""
     tags = record.tags
     if attr is PubmedAttrName.CITATION:
+        title = _first(tags, "TI") or _first(tags, "BTI")
+        journal = _first(tags, "JT") or _first(tags, "TA") or _first(tags, "CTI")
+        source = _first(tags, "SO") or _book_source(tags)
         return {
-            "title": _first(tags, "TI"),
-            "journal": _first(tags, "JT") or _first(tags, "TA"),
+            "title": title,
+            "journal": journal,
             "date": _first(tags, "DP"),
             "volume": _first(tags, "VI"),
             "issue": _first(tags, "IP"),
             "pages": _first(tags, "PG"),
-            "source": _first(tags, "SO"),
+            "source": source,
+            "publisher": _first(tags, "PB"),
+            "place": _first(tags, "PL"),
         }
     if attr is PubmedAttrName.ABSTRACT:
         return _first(tags, "AB")
@@ -41,6 +46,21 @@ def project_medline_section(record: MedlineRecord, attr: PubmedAttrName) -> Any:
 def _first(tags: dict[str, list[str]], key: str) -> str | None:
     values = tags.get(key) or []
     return values[0] if values else None
+
+
+def _book_source(tags: dict[str, list[str]]) -> str | None:
+    """Build a SO-like line for book/report records (BTI/CTI/PB)."""
+    bits = [
+        part
+        for part in (
+            _first(tags, "PB"),
+            _first(tags, "PL"),
+            _first(tags, "DP"),
+            _first(tags, "CTI"),
+        )
+        if part
+    ]
+    return ". ".join(bits) if bits else None
 
 
 def _authors(tags: dict[str, list[str]]) -> list[dict[str, str | None]]:

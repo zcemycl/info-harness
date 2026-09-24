@@ -10,6 +10,7 @@ from model.research.evidence_note import EvidenceNote
 from model.research.planner_output import PlannerOutput
 from prompt.load_prompt import load_prompt
 from tools.evidence.compact_evidence_notes import compact_evidence_notes
+from tools.fda.fda_completeness_gaps import fda_completeness_gaps
 
 
 def plan_fda_tasks(
@@ -30,8 +31,12 @@ def plan_fda_tasks(
             "worker=indication → disease/condition only (HIV, melanoma). "
             "worker=id → FDA setid only. "
             "worker=therapeutic_area → broad TA only (oncology). "
-            "Never set worker=tradename with query=HIV."
+            "Never set worker=tradename with query=HIV. "
+            "After adverse_effects/clinical_trials with Table placeholders, "
+            "fetch paired *_tables (auto-expand may help). Aim for ≥1 trial "
+            "per subindication and both ae_reaction + laboratory AE tables."
         ),
+        "completeness_gaps": fda_completeness_gaps(evidence),
         "latest_diary": diary[-1].model_dump(mode="json") if diary else None,
         "evidence_tail": compact_evidence_notes(evidence),
     }

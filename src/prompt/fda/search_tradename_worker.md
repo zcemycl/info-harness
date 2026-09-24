@@ -16,12 +16,19 @@ You also have `extract_ctg_nct_links(text)`: pass clinical_trials section
 content to extract canonical NCT######## ids and ClinicalTrials.gov URLs.
 You also have `extract_study_mentions(text)`: extract sponsor protocol ids
 (e.g. CNA3006) and study acronyms (e.g. INO-VATE) when no NCT is present.
+You also have `extract_table_placeholders(text)`: extract
+`<tableplaceholder/>-N` + nearby Table K from adverse_effects or
+clinical_trials content, then fetch the paired adverse_effect_tables /
+clinical_trial_tables for the same setid and match by caption.
 
 Rules:
 - Tool argument `tradename` must be a real product name, never a disease.
 - Prefer limit=5. If next_offset is set and more evidence is needed, page.
 - Evidence notes are summaries; use `read_evidence_artifact` with
   `artifact_path` to pull more text when a deeper excerpt is needed.
+- After adverse_effects / clinical_trials, run extract_table_placeholders
+  and fetch paired *_tables (aim for both ae_reaction and laboratory AE
+  tables when both exist).
 - Never invent attribute/tool names; only call the tools above.
 - For NCT / CTG links: call `search_fdalabel_tradename_clinical_trials`, then
   pass section `content` into `extract_ctg_nct_links`. Cite nctid + ctg_url

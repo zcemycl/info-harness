@@ -10,6 +10,7 @@ from model.ctg.ctg_planner_output import CtgPlannerOutput
 from model.research.diary_entry import DiaryEntry
 from prompt.load_prompt import load_prompt
 from tools.evidence.compact_evidence_notes import compact_evidence_notes
+from tools.research.collect_nct_ids import collect_nct_ids
 
 
 def plan_ctg_tasks(
@@ -22,15 +23,18 @@ def plan_ctg_tasks(
     """Ask the planner LLM for CtgWorkerPlan tasks."""
     llm = chat_model(model_env="OPENROUTER_FDA_SPECIALIST_MODEL")
     structured = llm.with_structured_output(CtgPlannerOutput)
+    ncts_in_brief = collect_nct_ids(brief)
     payload = {
         "brief": brief,
         "loop": loop,
+        "ncts_in_brief": ncts_in_brief,
         "routing_reminder": (
-            "worker=nctid → real NCT######## + HC attrs. "
-            "worker=fetch → real NCT######## live CT.gov (incl. references). "
-            "worker=condition → condition phrase autocomplete (both_sides). "
-            "Never invent NCT ids. Never use demo placeholders "
-            "(NCT01234567 / NCT01234569 / ascending digits)."
+            "If ncts_in_brief is non-empty, plan worker=nctid or fetch for "
+            "EACH listed NCT with attrs (basic_info/outcomes/adverse_events/"
+            "demographics/conditions/locations; references via fetch when "
+            "thin). Do NOT use worker=condition or resolve_trial when NCT "
+            "ids are already present. Never invent NCT ids. Never use demo "
+            "placeholders (NCT01234567 / NCT01234569 / ascending digits)."
         ),
         "latest_diary": diary[-1].model_dump(mode="json") if diary else None,
         "evidence_tail": compact_evidence_notes(evidence),

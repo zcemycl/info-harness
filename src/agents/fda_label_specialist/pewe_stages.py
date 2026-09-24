@@ -7,6 +7,9 @@ from typing import Any
 from agents.fda_label_specialist.emit_stage_answer import emit_stage_answer
 from agents.fda_label_specialist.evaluate_loop import evaluate_fda_loop
 from agents.fda_label_specialist.execute_tasks import execute_fda_tasks
+from agents.fda_label_specialist.expand_fda_section_table_triples import (
+    expand_fda_section_table_triples,
+)
 from agents.fda_label_specialist.plan_tasks import plan_fda_tasks
 from agents.fda_label_specialist.stage_answer_text import (
     evaluator_answer_text,
@@ -68,6 +71,8 @@ def run_executor_stage(
     """Execute tasks and emit a next-agent answer."""
     with trace_span("stage", "executor", tasks=len(tasks)):
         pairs, failures = execute_fda_tasks(tasks)
+        pairs, expand_failures = expand_fda_section_table_triples(pairs)
+        failures = [*failures, *expand_failures]
         if failures:
             trace_info("failures", count=len(failures))
         status = AnswerStatus.ERROR if failures and not pairs else AnswerStatus.OK

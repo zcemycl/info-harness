@@ -22,9 +22,13 @@ def synthesize_pubmed_answer(brief: str, evidence: list[PubmedEvidenceNote]) -> 
                 "role": "system",
                 "content": (
                     "Answer the brief using only the evidence notes. "
-                    "Cite PMIDs. For literature outcomes, use abstract "
-                    "summaries (METHODS/RESULTS narrative). Do not invent "
-                    "endpoints or PMIDs. Be concise."
+                    "Cite PMIDs. Prefer abstract METHODS/RESULTS when "
+                    "present. If abstract is missing/null, synthesize from "
+                    "citation (including book BTI/CTI titles), mesh, "
+                    "chemicals, keywords, publication_types, and "
+                    "secondary_ids — do not say only 'no abstract "
+                    "available' when those sections have content. Do not "
+                    "invent endpoints or PMIDs. Be concise."
                 ),
             },
             {

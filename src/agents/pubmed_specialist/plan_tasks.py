@@ -27,8 +27,9 @@ def plan_pubmed_tasks(
         "loop": loop,
         "routing_reminder": (
             "worker=id → numeric PMID + attrs. "
-            "For CT.gov-empty outcomes prefer abstract (+ citation). "
-            "Never invent PMIDs."
+            "Prefer abstract (+ citation) when present; if abstract is "
+            "null/empty, fetch citation + mesh/keywords/chemicals/"
+            "publication_types/secondary_ids. Never invent PMIDs."
         ),
         "latest_diary": diary[-1].model_dump(mode="json") if diary else None,
         "evidence_tail": compact_evidence_notes(evidence),

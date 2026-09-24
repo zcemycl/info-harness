@@ -62,6 +62,16 @@ Pick only from this fixed list:
 attrs do NOT choose the worker. worker chooses the search API.
 Prefer 1–2 attrs per task; page with next_offset if more is needed.
 
+## Section ↔ table pairing (mandatory)
+- `adverse_effects` embeds `<tableplaceholder/>-N` markers tied to nearby
+  `Table K` labels. After AE prose, fetch `adverse_effect_tables` for the
+  same setid and match captions `Table K`.
+- `clinical_trials` likewise pairs with `clinical_trial_tables`.
+- Prefer worker=id + setid once known for tables (precise).
+- Completeness: ≥1 pivotal trial (NCT or protocol) per subindication /
+  `<title>` block under clinical_trials; for AE tables cover both
+  **ae_reaction** and **laboratory** kinds when both exist on the label.
+
 ## NCT ids from clinical_trials
 - After clinical_trials / clinical_trial_tables, extract NCTs only via
   `extract_ctg_nct_links` on section content.

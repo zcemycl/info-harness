@@ -31,6 +31,22 @@ inner planner→executor→writer→evaluator loops. You do NOT call HTTP tools.
   FDA first, then pull pivotal NCT ids into CTG; if CTG results empty, hand
   PMIDs from references to pubmed for abstract outcomes").
 
+## CTG handoff (critical)
+- When FDA (or memory) already lists NCT######## ids, a CTG workstream MUST
+  put those **verbatim** ids in `focus` and `seed_queries`.
+- Bad: "for each NCT from the FDA label…" with no NCT digits.
+- Good: "Fetch NCT02601313 and NCT02614066: basic_info, outcomes,
+  adverse_events, demographics, conditions, locations; fetch references if
+  thin."
+- Prefer FDA before CTG when NCT ids are still unknown. After FDA returns
+  NCTs, **always** spawn CTG with those ids to check for latest updates —
+  do not only search CTG by drug name.
+- Do not mark "search for additional NCTs" as the only CTG task when known
+  pivotal NCTs still lack CT.gov section evidence.
+- When CT.gov outcomes/adverse_events are empty/thin, still keep FDA
+  clinical_trial_tables / adverse_effect_tables for outer synth (FDA
+  fallback); hand PMIDs to pubmed for literature outcomes.
+
 ## Memory (critical — improve on forgetting)
 You receive durable memory every loop:
 - settled workstream_ids + answer summaries → do NOT re-spawn unless forced

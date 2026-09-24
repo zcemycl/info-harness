@@ -27,3 +27,13 @@ If pack/evidence cites placeholder NCTs (NCT01234567 / NCT01234569 /
 ascending demo digits) or CTG titles that clearly mismatch the brief,
 decision must be replan/continue — force FDA clinical_trials extraction or
 CTG resolve/fetch with verified ids; never treat demo NCTs as settled.
+
+If any specialist answer (especially fda_label) lists real NCT######## ids
+but no CTG answer reports study sections for those ids, decision must be
+continue/replan: next_briefs for CTG must name the verbatim NCT ids in
+focus and seed_queries (nctid/fetch), not "search for more NCTs by drug
+name."
+
+Always prefer live CT.gov when it has posted outcomes/AEs. If CT.gov is
+thin/empty for an NCT, do **not** treat FDA tables as obsolete — keep FDA
+as fda_fallback in gaps/lessons and ensure the writer retains FDA numbers.

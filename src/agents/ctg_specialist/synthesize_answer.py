@@ -22,11 +22,14 @@ def synthesize_ctg_answer(brief: str, evidence: list[CtgEvidenceNote]) -> str:
                 "role": "system",
                 "content": (
                     "Answer the brief using only the evidence notes. "
-                    "Cite nctid (and setid when present). For references, "
-                    "use evidence.names (PMIDs) and the summary — do not say "
+                    "Cite nctid (and setid when present). When the brief "
+                    "lists NCT ids, report study sections for those ids "
+                    "from nctid/fetch notes — do not claim 'no NCT found' "
+                    "if the brief already named them. For references, use "
+                    "evidence.names (PMIDs) and the summary — do not say "
                     "PMIDs are missing if names is non-empty. Cite "
-                    "resolve_trial outcomes or condition names from evidence. "
-                    "Do not invent. Be concise."
+                    "resolve_trial outcomes or condition names only when "
+                    "no NCT was available. Do not invent. Be concise."
                 ),
             },
             {

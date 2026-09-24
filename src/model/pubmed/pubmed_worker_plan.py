@@ -24,8 +24,9 @@ class PubmedWorkerPlan(BaseModel):
     query: str = Field(description="PubMed PMID digits (e.g. 25712454).")
     attrs: list[PubmedAttrName] = Field(
         description=(
-            "MEDLINE sections to return (min 1). For literature outcomes "
-            "when CT.gov has no results, prefer abstract (+ citation)."
+            "MEDLINE sections to return (min 1). Prefer abstract (+ citation) "
+            "when present; if abstract is empty, use citation, mesh, "
+            "keywords, chemicals, publication_types, secondary_ids."
         ),
     )
     offset: int = Field(default=0, ge=0, description="Pagination offset")

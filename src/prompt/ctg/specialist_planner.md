@@ -59,9 +59,20 @@ Workers are DIFFERENT search axes. Choosing the wrong one fails the API.
 - both_sides=true: substring either side → %q%
 - Prefer prefix first; flip both_sides on miss.
 
+## Routing priority when NCT ids are known
+If the brief, seed queries, or `ncts_in_brief` list any real NCT########:
+1. Plan **worker=nctid** and/or **worker=fetch** for each NCT.
+2. Prefer attrs needed by the brief (outcomes, adverse_events, basic_info,
+   demographics, conditions, locations; references via fetch when results
+   are empty/thin).
+3. Do **not** use worker=condition or resolve_trial to "discover" those
+   NCTs. Condition/resolve are only for when no NCT id is available yet.
+
 ## Routing examples
 - "outcomes for NCT02601313" → worker=nctid, query="NCT02601313",
   attrs=[outcomes]
+- brief lists NCT02601313 + NCT02614066 → one nctid/fetch task per NCT
+  (attrs covering outcomes/adverse_events/basic_info as needed)
 - "latest status / PubMed refs for NCT02601313" → worker=fetch,
   query="NCT02601313", attrs=[basic_info, references]
 - "what CTG condition names match melanoma" → worker=condition,

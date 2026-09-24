@@ -10,6 +10,7 @@ from model.research.research_memory import (
     TriedIdea,
 )
 from model.research.research_pack import ResearchPack
+from tools.research.collect_nct_ids import collect_nct_ids
 
 
 def update_research_memory(
@@ -28,10 +29,18 @@ def update_research_memory(
         dict.fromkeys([*memory.rejected_directions, *evaluation.reject_directions])
     )
     gaps = list(dict.fromkeys(evaluation.evidence_gaps))
+    pack_ncts = collect_nct_ids(
+        *[o.answer.answer for o in pack.outcomes],
+        *[o.brief.focus for o in pack.outcomes],
+    )
+    if pack_ncts:
+        lessons = list(
+            dict.fromkeys([*lessons, "Known NCT ids: " + ", ".join(pack_ncts)])
+        )
 
     force = set(evaluation.force_rerun_workstream_ids)
     for outcome in pack.outcomes:
-        summary = (outcome.answer.answer or "")[:240]
+        summary = _outcome_summary(outcome.answer.answer or "")
         tried[outcome.idea_fingerprint] = TriedIdea(
             fingerprint=outcome.idea_fingerprint,
             workstream_id=outcome.workstream_id,
@@ -66,3 +75,12 @@ def update_research_memory(
         rejected_directions=rejected,
         open_gaps=gaps,
     )
+
+
+def _outcome_summary(answer: str) -> str:
+    ncts = collect_nct_ids(answer)
+    head = answer[:240]
+    if not ncts:
+        return head
+    tag = " NCTs: " + ", ".join(ncts)
+    return (head + tag)[:400]

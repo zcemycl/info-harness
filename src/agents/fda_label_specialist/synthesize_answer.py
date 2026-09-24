@@ -25,7 +25,12 @@ def synthesize_fda_answer(brief: str, evidence: list[EvidenceNote]) -> str:
                     "Cite tradename and setid. Be concise. "
                     "When NCT ids or CTG links appear in evidence, copy them "
                     "exactly (clinicaltrials.gov/study/… URLs). "
-                    "Do not invent NCT ids or /ct2/show/ links."
+                    "Do not invent NCT ids or /ct2/show/ links. "
+                    "For each subindication/title section, cite ≥1 pivotal "
+                    "trial (NCT or protocol id). For adverse effects, cite "
+                    "both ae_reaction and laboratory tables when present "
+                    "(use Table N / kind= from notes). Prefer linked table "
+                    "grids over prose alone for numeric rates."
                 ),
             },
             {

@@ -12,6 +12,8 @@ from model.research.research_eval_result import ResearchEvalResult
 from model.research.research_memory import ResearchMemory
 from model.research.research_plan import ResearchPlan
 from prompt.load_prompt import load_prompt
+from tools.research.collect_nct_ids_from_memory import collect_nct_ids_from_memory
+from tools.research.enrich_ctg_briefs import enrich_ctg_briefs
 
 
 def plan_workstreams(
@@ -48,4 +50,6 @@ def plan_workstreams(
     plan = plan.model_copy(update={"selected": ensure_workstream_ids(plan.selected)})
     plan = apply_eval_feedback(plan, eval_feedback)
     plan = restrict_plan_to_open(plan, memory, eval_feedback)
-    return plan.model_copy(update={"selected": ensure_workstream_ids(plan.selected)})
+    known_ncts = collect_nct_ids_from_memory(memory)
+    selected = enrich_ctg_briefs(ensure_workstream_ids(plan.selected), known_ncts)
+    return plan.model_copy(update={"selected": selected})
