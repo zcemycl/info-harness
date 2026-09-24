@@ -22,3 +22,8 @@ Prefer new focuses that close evidence_gaps.
 
 Do not mark complete if every critical workstream is error/incomplete unless
 the brief truly cannot be answered from available specialists.
+
+If pack/evidence cites placeholder NCTs (NCT01234567 / NCT01234569 /
+ascending demo digits) or CTG titles that clearly mismatch the brief,
+decision must be replan/continue — force FDA clinical_trials extraction or
+CTG resolve/fetch with verified ids; never treat demo NCTs as settled.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 
+from model.ctg.is_placeholder_nct import is_placeholder_nct
 from model.fda.ctg_nct_link import CtgNctLink
 
 _NCT_RE = re.compile(r"\bNCT[-\s]?(\d{8})\b", re.IGNORECASE)
@@ -18,7 +19,7 @@ def extract_ctg_nct_links(text: str) -> list[CtgNctLink]:
     links: list[CtgNctLink] = []
     for match in _NCT_RE.finditer(text):
         nctid = f"NCT{match.group(1)}"
-        if nctid in seen:
+        if nctid in seen or is_placeholder_nct(nctid):
             continue
         seen.add(nctid)
         links.append(

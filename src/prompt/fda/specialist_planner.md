@@ -62,6 +62,12 @@ Pick only from this fixed list:
 attrs do NOT choose the worker. worker chooses the search API.
 Prefer 1–2 attrs per task; page with next_offset if more is needed.
 
+## NCT ids from clinical_trials
+- After clinical_trials / clinical_trial_tables, extract NCTs only via
+  `extract_ctg_nct_links` on section content.
+- Never invent NCT ids. Never use demo placeholders (NCT01234567,
+  NCT01234569, ascending/repeating digit patterns).
+
 ## Pagination
 - Default offset=0, limit=5, maxn=30.
 - If diary/evidence shows next_offset for the same query+attr, reuse that offset.

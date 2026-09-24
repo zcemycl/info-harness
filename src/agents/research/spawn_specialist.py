@@ -16,6 +16,7 @@ from model.research.specialist_kind import SpecialistKind
 from pipeline.run_ctg_specialist import run_ctg_specialist_pipeline
 from pipeline.run_fda_label_specialist import run_fda_label_specialist_pipeline
 from pipeline.run_icd_ta_specialist import run_icd_ta_specialist_pipeline
+from pipeline.run_pubmed_specialist import run_pubmed_specialist_pipeline
 
 
 def spawn_specialist_sync(
@@ -82,4 +83,6 @@ def _dispatch(
         return run_ctg_specialist_pipeline(focus, max_loops=max_loops, run_id=run_id)
     if kind is SpecialistKind.ICD_TA:
         return run_icd_ta_specialist_pipeline(focus, max_loops=max_loops, run_id=run_id)
+    if kind is SpecialistKind.PUBMED:
+        return run_pubmed_specialist_pipeline(focus, max_loops=max_loops, run_id=run_id)
     raise ValueError(f"Unsupported specialist: {kind}")

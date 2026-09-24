@@ -11,6 +11,7 @@ from model.ctg.ctg_attr_name import (
     HC_CTG_ATTRS,
     CtgAttrName,
 )
+from model.ctg.is_placeholder_nct import is_placeholder_nct, nct_digits
 
 
 class CtgWorkerName(StrEnum):
@@ -68,9 +69,19 @@ class CtgWorkerPlan(BaseModel):
 
     @model_validator(mode="after")
     def _validate_attrs_by_worker(self) -> CtgWorkerPlan:
+        q = self.query.strip()
+        if is_placeholder_nct(q):
+            raise ValueError(
+                f"placeholder/demo NCT id rejected: {self.query!r} "
+                "(never invent NCT01234567 / NCT00123456-style ids)"
+            )
         if self.worker is CtgWorkerName.NCTID:
             if not self.attrs:
                 raise ValueError("worker=nctid requires at least one attr")
+            if nct_digits(q) is None:
+                raise ValueError(
+                    f"worker=nctid query must be NCT########, got {self.query!r}"
+                )
             bad = [a for a in self.attrs if a not in HC_CTG_ATTRS]
             if bad:
                 names = ", ".join(a.value for a in bad)
@@ -78,8 +89,18 @@ class CtgWorkerPlan(BaseModel):
         elif self.worker is CtgWorkerName.FETCH:
             if not self.attrs:
                 raise ValueError("worker=fetch requires at least one attr")
+            if nct_digits(q) is None:
+                raise ValueError(
+                    f"worker=fetch query must be NCT########, got {self.query!r}"
+                )
             bad = [a for a in self.attrs if a not in FETCH_CTG_ATTRS]
             if bad:
                 names = ", ".join(a.value for a in bad)
                 raise ValueError(f"worker=fetch does not support attr(s): {names}")
+        elif self.worker is CtgWorkerName.RESOLVE_TRIAL:
+            if nct_digits(q) is not None:
+                raise ValueError(
+                    "worker=resolve_trial query must be a study name / "
+                    f"protocol id, not an NCT id (got {self.query!r})"
+                )
         return self

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from hc_http.ctg.ctgov_request import ctgov_request_json
+from model.ctg.is_placeholder_nct import is_placeholder_nct
 
 
 def run_get_ctgov_study_raw(nctid: str) -> dict[str, Any]:
@@ -12,6 +13,8 @@ def run_get_ctgov_study_raw(nctid: str) -> dict[str, Any]:
     nid = nctid.strip().upper()
     if not nid.startswith("NCT"):
         raise ValueError(f"invalid NCT id: {nctid!r}")
+    if is_placeholder_nct(nid):
+        raise ValueError(f"placeholder/demo NCT id rejected: {nctid!r}")
     data = ctgov_request_json(f"/studies/{nid}")
     if not isinstance(data, dict):
         raise RuntimeError(f"Unexpected CT.gov type: {type(data).__name__}")

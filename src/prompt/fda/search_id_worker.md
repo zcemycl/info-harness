@@ -22,8 +22,9 @@ Rules:
 - Prefer limit=5. If next_offset is set and more evidence is needed, page.
 - Never invent attribute/tool names; only call the tools above.
 - For NCT / CTG links: call `search_fdalabel_id_clinical_trials`, then
-  pass section `content` into `extract_ctg_nct_links`. Cite nctid + ctg_url.
-  Do not invent NCT ids.
+  pass section `content` into `extract_ctg_nct_links`. Cite nctid + ctg_url
+  **exactly as returned**. Do not invent NCT ids. Never emit placeholders
+  like NCT01234567 / NCT01234569 — only ids from extract_ctg_nct_links.
 - For non-NCT trial names: also pass clinical_trials content into
   `extract_study_mentions` and cite protocol ids / acronyms. Do not invent NCTs.
 - Always end with a clear answer for a human or the next agent: cite

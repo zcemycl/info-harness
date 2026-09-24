@@ -18,7 +18,8 @@ def extract_ctg_nct_links_tool() -> StructuredTool:
     _call.__doc__ = (
         "Extract NCT######## ids and ClinicalTrials.gov study URLs from text. "
         "Pass clinical_trials section content (or any blob that may contain "
-        "NCT ids). Returns nctid + ctg_url; does not invent ids."
+        "NCT ids). Returns nctid + ctg_url found in the text only — never "
+        "invents placeholders like NCT01234567."
     )
     return StructuredTool.from_function(
         name="extract_ctg_nct_links",

@@ -25,10 +25,11 @@ def plan_ctg_tasks(
         "brief": brief,
         "loop": loop,
         "routing_reminder": (
-            "worker=nctid → NCT######## + HC attrs. "
-            "worker=fetch → NCT######## live CT.gov (incl. references). "
+            "worker=nctid → real NCT######## + HC attrs. "
+            "worker=fetch → real NCT######## live CT.gov (incl. references). "
             "worker=condition → condition phrase autocomplete (both_sides). "
-            "Never invent NCT ids."
+            "Never invent NCT ids. Never use demo placeholders "
+            "(NCT01234567 / NCT01234569 / ascending digits)."
         ),
         "latest_diary": diary[-1].model_dump(mode="json") if diary else None,
         "evidence_tail": [n.model_dump(mode="json") for n in evidence[-20:]],

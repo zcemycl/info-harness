@@ -46,6 +46,8 @@ uv run python src/main.py http ctg search-by-compare-filters --filters-json '{"f
 uv run python src/main.py http ta search immuno
 uv run python src/main.py http ta search immuno --both-sides   # %q% vs default q%
 uv run python src/main.py http pubmed search "pembrolizumab melanoma"
+uv run python src/main.py http pubmed id-sections abstract 25712454
+uv run python src/main.py http pubmed id-sections citation 25712454
 
 # Agents (FDA / ICD / CTG workers + specialists)
 uv run python src/main.py agent --help
@@ -57,6 +59,8 @@ uv run python src/main.py agent ctg-fetch "latest status and PubMed refs for NCT
 uv run python src/main.py agent ctg-search-condition "CTG condition names for melanoma"
 uv run python src/main.py agent ctg-resolve-trial "resolve INO-VATE to an NCT id"
 uv run python src/main.py agent ctg-specialist "What are the outcomes for NCT01234567?"
+uv run python src/main.py agent pubmed-id-sections "abstract and citation for PMID 25712454"
+uv run python src/main.py agent pubmed-specialist "literature outcomes for PMID 25712454"
 uv run python src/main.py agent research "Keytruda indications and related pivotal trials"
 
 # Eval (FDA/CTG workers + inner specialist; fixtures + optional LLM judge)

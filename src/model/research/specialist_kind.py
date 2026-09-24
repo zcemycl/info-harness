@@ -6,8 +6,9 @@ from enum import StrEnum
 
 
 class SpecialistKind(StrEnum):
-    """Callable specialist pipelines (PubMed deferred)."""
+    """Callable specialist pipelines."""
 
     FDA_LABEL = "fda_label"
     CTG = "ctg"
     ICD_TA = "icd_ta"
+    PUBMED = "pubmed"
