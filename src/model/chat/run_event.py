@@ -16,7 +16,11 @@ class RunEvent(BaseModel):
     run_id: str
     chat_id: str
     loop: int | None = None
+    tier: Literal["outer", "inner", "worker"] | None = None
+    domain: str | None = None
+    stage: str | None = None
     agent: str | None = None
     status: str | None = None
     summary: str = ""
     answer: str | None = None
+    path: str | None = None

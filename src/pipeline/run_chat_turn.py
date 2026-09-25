@@ -8,6 +8,7 @@ from pipeline.run_research import run_research_pipeline
 from tools.chat.append_message import append_message
 from tools.chat.append_run_event import append_run_event
 from tools.chat.bind_chat_owner import bind_chat_owner
+from tools.chat.classify_stage import classify_stage
 from tools.chat.put_run_result import put_run_result
 from tools.chat.put_run_status import put_run_status
 from tools.chat.stage_events import bind_stage_events
@@ -35,6 +36,7 @@ def run_chat_turn(
 
 def _execute(chat_id: str, run_id: str, brief: str) -> None:
     def _on_stage(entry: AgentAnswer) -> None:
+        tier, domain, stage = classify_stage(entry)
         append_run_event(
             RunEvent(
                 ts=utc_now(),
@@ -42,9 +44,13 @@ def _execute(chat_id: str, run_id: str, brief: str) -> None:
                 run_id=run_id,
                 chat_id=chat_id,
                 loop=entry.loop,
+                tier=tier,
+                domain=domain,
+                stage=stage,
                 agent=entry.agent,
                 status=entry.status.value,
                 summary=_summary(entry.answer),
+                path=entry.path,
             )
         )
 

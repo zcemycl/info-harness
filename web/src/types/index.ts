@@ -30,10 +30,14 @@ export type RunEvent = {
   seq: number;
   type: "stage" | "final" | "error";
   loop?: number | null;
+  tier?: "outer" | "inner" | "worker" | null;
+  domain?: string | null;
+  stage?: string | null;
   agent?: string | null;
   status?: string | null;
   summary?: string;
   answer?: string | null;
+  path?: string | null;
 };
 
 export type RunView = {

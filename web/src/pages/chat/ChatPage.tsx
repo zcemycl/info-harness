@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { apiFetch } from "@/api/client";
 import { MarkdownMessage } from "@/components/MarkdownMessage";
+import { RunActivity } from "@/components/step-graph/RunActivity";
 import { useAuth } from "@/hooks";
-import type { ChatMessage, ChatMeta, RunEvent, RunView } from "@/types";
+import type { ChatMessage, ChatMeta, RunEvent } from "@/types";
+import { followRun } from "./followRun";
 
 export function ChatPage() {
   const { accessToken, logout, user } = useAuth();
   const [chats, setChats] = useState<ChatMeta[]>([]);
   const [chatId, setChatId] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [stages, setStages] = useState<string[]>([]);
+  const [stages, setStages] = useState<RunEvent[]>([]);
+  const [settled, setSettled] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
   const token = accessToken ?? "";
@@ -26,6 +29,7 @@ export function ChatPage() {
     async (id: string) => {
       setChatId(id);
       setStages([]);
+      setSettled(false);
       const response = await apiFetch(token, `/chats/${id}`);
       if (!response.ok) throw new Error(await response.text());
       setMessages((await response.json()) as ChatMessage[]);
@@ -37,6 +41,7 @@ export function ChatPage() {
     setChatId("");
     setMessages([]);
     setStages([]);
+    setSettled(false);
     setChats([]);
     setError(null);
     if (!accountId) return;
@@ -56,6 +61,7 @@ export function ChatPage() {
       setChatId("");
       setMessages([]);
       setStages([]);
+      setSettled(false);
     }
     await loadChats();
   }
@@ -70,11 +76,11 @@ export function ChatPage() {
   }
 
   function onStage(event: RunEvent) {
-    if (event.type === "stage") {
-      const loop = event.loop ? `loop ${event.loop} · ` : "";
-      setStages((current) => [...current, `${loop}${event.agent ?? "stage"}: ${event.summary ?? ""}`]);
-      return;
+    if (event.type === "stage" || event.type === "error") {
+      setStages((current) => (current.some((item) => item.seq === event.seq) ? current : [...current, event]));
     }
+    if (event.type === "final" || event.type === "error") setSettled(true);
+    if (event.type === "stage") return;
     setMessages((current) => [
       ...current,
       {
@@ -88,32 +94,8 @@ export function ChatPage() {
 
   async function follow(runId: string) {
     setStages([]);
-    const stream = await apiFetch(token, `/runs/${runId}/events/stream`);
-    if (stream.ok && stream.body) {
-      await readStream(stream, onStage);
-      return;
-    }
-    let after = 0;
-    for (let attempt = 0; attempt < 900; attempt += 1) {
-      const polled = await apiFetch(token, `/runs/${runId}/events?after=${after}`);
-      if (polled.ok) {
-        const events = (await polled.json()) as RunEvent[];
-        for (const event of events) {
-          after = Math.max(after, event.seq);
-          onStage(event);
-          if (event.type === "final" || event.type === "error") return;
-        }
-      }
-      const viewResponse = await apiFetch(token, `/runs/${runId}`);
-      if (viewResponse.ok) {
-        const view = (await viewResponse.json()) as RunView;
-        if (view.status === "succeeded" || view.status === "failed") {
-          onStage({ seq: after, type: view.status === "failed" ? "error" : "final", answer: view.answer, summary: view.error ?? "" });
-          return;
-        }
-      }
-      await new Promise((resolve) => window.setTimeout(resolve, 1000));
-    }
+    setSettled(false);
+    await followRun(token, runId, onStage);
   }
 
   async function send(event: FormEvent) {
@@ -171,7 +153,14 @@ export function ChatPage() {
       </aside>
       <main className="flex min-h-svh flex-col p-4">
         {error ? <p className="mb-3 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
-        <ol className="flex-1 space-y-2 overflow-auto">
+        <form className="grid grid-cols-[1fr_auto] gap-2" onSubmit={(event) => void send(event)}>
+          <textarea className="rounded-lg border px-3 py-2" rows={3} value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="Ask a research question" required />
+          <button className="rounded-lg bg-[#0c1f1a] px-4 text-white" type="submit">
+            Send
+          </button>
+        </form>
+        {stages.length > 0 ? <RunActivity events={stages} settled={settled} /> : null}
+        <ol className="mt-3 flex-1 space-y-2 overflow-auto">
           {messages.map((message, index) => (
             <li
               key={`${message.ts}-${index}`}
@@ -181,41 +170,7 @@ export function ChatPage() {
             </li>
           ))}
         </ol>
-        {stages.length > 0 ? (
-          <ol className="mt-3 max-h-40 overflow-auto border-t border-[#0c1f1a]/10 pt-2 text-xs text-[#3d5a50]">
-            {stages.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ol>
-        ) : null}
-        <form className="mt-3 grid grid-cols-[1fr_auto] gap-2" onSubmit={(event) => void send(event)}>
-          <textarea className="rounded-lg border px-3 py-2" rows={3} value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="Ask a research question" required />
-          <button className="rounded-lg bg-[#0c1f1a] px-4 text-white" type="submit">
-            Send
-          </button>
-        </form>
       </main>
     </div>
   );
-}
-
-async function readStream(response: Response, onEvent: (event: RunEvent) => void): Promise<void> {
-  const reader = response.body?.getReader();
-  if (!reader) return;
-  const decoder = new TextDecoder();
-  let buffer = "";
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) return;
-    buffer += decoder.decode(value, { stream: true });
-    const frames = buffer.split("\n\n");
-    buffer = frames.pop() ?? "";
-    for (const frame of frames) {
-      const line = frame.split("\n").find((item) => item.startsWith("data: "));
-      if (!line) continue;
-      const event = JSON.parse(line.slice(6)) as RunEvent;
-      onEvent(event);
-      if (event.type === "final" || event.type === "error") return;
-    }
-  }
 }
