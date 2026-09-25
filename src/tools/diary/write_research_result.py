@@ -7,18 +7,19 @@ from pathlib import Path
 from uuid import uuid4
 
 from model.research.research_result import ResearchResult
-from tools.diary.default_diary_dir import DEFAULT_DIARY_DIR
+from tools.diary.default_diary_dir import diary_root
 from tools.diary.diary_folder import diary_folder
+from tools.diary.relative_diary_path import relative_diary_path
 
 
 def write_research_result(
     result: ResearchResult,
     *,
-    diary_dir: Path = DEFAULT_DIARY_DIR,
+    diary_dir: Path | None = None,
     name_prefix: str | None = None,
 ) -> str:
-    """Write ``final-<stamp>.json``; return its cwd-relative path."""
-    root = diary_dir.expanduser().resolve()
+    """Write ``final-<stamp>.json``; return its path relative to the diary root."""
+    root = diary_root(diary_dir)
     folder = diary_folder(root, name_prefix)
     folder.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
@@ -27,4 +28,4 @@ def write_research_result(
         result.model_dump_json(indent=2) + "\n",
         encoding="utf-8",
     )
-    return path.relative_to(Path.cwd().resolve()).as_posix()
+    return relative_diary_path(path, root)

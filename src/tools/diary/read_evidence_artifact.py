@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 from typing import Any
 
-from tools.diary.default_diary_dir import DEFAULT_DIARY_DIR
 from tools.diary.resolve_diary_path import resolve_diary_path
 
 
@@ -16,7 +15,7 @@ def read_evidence_artifact(
     *,
     offset: int = 0,
     limit_chars: int | None = None,
-    diary_dir: Path = DEFAULT_DIARY_DIR,
+    diary_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Load an evidence artifact; return meta + windowed text of the value."""
     resolved = resolve_diary_path(path, diary_dir=diary_dir)

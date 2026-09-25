@@ -294,7 +294,7 @@ Entries are append-only per run (`write_diary`); planners receive the growing li
 | [`docs/layout.md`](docs/layout.md)       | `src/` folder map and conventions  |
 | [`src/cli/readme.md`](src/cli/readme.md) | CLI packaging rules                |
 
-CI: [`.github/workflows/lint.yml`](.github/workflows/lint.yml) runs Python lint and builds `web/`. On push it deploys `web/dist` to `gh-pages` with `VITE_APP_BASENAME=/info-harness`. Set repo secrets `VITE_COGNITO_USER_POOL_ID`, `VITE_COGNITO_USER_POOL_CLIENT_ID`, and `VITE_API_BASE_URL` (plus optional `VITE_COGNITO_REGION` and `VITE_COGNITO_IDENTITY_POOL_ID`).
+CI: [`.github/workflows/lint.yml`](.github/workflows/lint.yml) runs Python lint and builds `web/`. On push it deploys `web/dist` to `gh-pages` with `VITE_APP_BASENAME=/info-harness`. Set repo secrets `VITE_COGNITO_USER_POOL_ID`, `VITE_COGNITO_USER_POOL_CLIENT_ID`, `VITE_API_BASE_URL`, and `VITE_AGENTIC_CHAT_STREAM_URL` (plus optional `VITE_COGNITO_REGION` and `VITE_COGNITO_IDENTITY_POOL_ID`). `VITE_API_BASE_URL` is the HTTP API. Chat create, list, messages, and run polling use it. `VITE_AGENTIC_CHAT_STREAM_URL` is the agentic-chat-stream Function URL (`invoke_mode = RESPONSE_STREAM`) and is used only for `GET /runs/{id}/events/stream`. Leave that variable empty for local uvicorn so both calls use `http://127.0.0.1:8080`. After Terraform creates the stream function, set GitHub secret `LAMBDA_STREAM_FUNCTION_NAME` (or rely on `{LAMBDA_FUNCTION_NAME}-stream`) so image pushes update both functions.
 
 ---
 
@@ -309,9 +309,9 @@ cd web && npm install && npm run dev
 
 Open [http://127.0.0.1:3000](http://127.0.0.1:3000) and sign in with Cognito. The app sends that access token on every API call. FastAPI checks it against the same user pool, then the research run uses it for HC requests. CLI `cognito-login` is unchanged and still writes `.cognito_tokens.json` for commands that are not the web app.
 
-Copy [`web/.env.sample`](web/.env.sample) to `web/.env.local` and set the same `COGNITO_*` values as `.env` plus `VITE_API_BASE_URL=http://127.0.0.1:8080`.
+Copy [`web/.env.sample`](web/.env.sample) to `web/.env.local` and set the same `COGNITO_*` values as `.env` plus `VITE_API_BASE_URL=http://127.0.0.1:8080`. Leave `VITE_AGENTIC_CHAT_STREAM_URL` empty locally.
 
 - `POST /chats/{id}/messages` stores the prompt and starts a run. The brief is the prompt alone on the first turn, and **last assistant answer + next prompt** after that.
 - `GET /runs/{id}/events/stream` pushes PEWE stage lines (SSE). `GET /runs/{id}/events?after=` is the poll fallback. `GET /runs/{id}` returns the final answer.
-- On Lambda, the image runs `uvicorn api.app:app` behind the Lambda Web Adapter with `AWS_LWA_INVOKE_MODE=response_stream`, so stage events can stream. Chat objects go to `CHAT_S3_BUCKET` (or `data/chats` locally). Build: `DOCKER_BUILDKIT=1 docker build --ssh default -t info-harness .`
+- On Lambda, the image runs `uvicorn api.app:app` behind the Lambda Web Adapter. The HTTP API function overrides `AWS_LWA_INVOKE_MODE=buffered`. A second function, `agentic-chat-stream`, overrides `response_stream` and serves the Function URL. `POST /messages` returns a `run_id`, then asynchronously invokes `POST /internal/research` on the buffered function. Diary files stay on local disk (`data/diary` locally, `/tmp/diary` on Lambda) and are not written to S3. Chat history, stage events, and the final answer go to `CHAT_S3_BUCKET`. Without that bucket, Lambda writes `/tmp/chats`, which disappears when the execution environment is replaced. Build: `DOCKER_BUILDKIT=1 docker build --ssh default -t info-harness .`
 - [`.github/workflows/push-lambda-ecr.yml`](.github/workflows/push-lambda-ecr.yml) builds that image on pushes to `main` (and `workflow_dispatch`), pushes it to ECR, and updates the Lambda function. Set repo secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `ECR_REGISTRY`, `LAMBDA_ECR_REPOSITORY`, `LAMBDA_FUNCTION_NAME`, and `PRIVATE_REPO_TOKEN` (`AWS_REGION` defaults to `eu-west-2`).

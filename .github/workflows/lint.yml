@@ -72,6 +72,7 @@ jobs:
           VITE_COGNITO_REGION: ${{ secrets.VITE_COGNITO_REGION || 'eu-west-2' }}
           VITE_COGNITO_IDENTITY_POOL_ID: ${{ secrets.VITE_COGNITO_IDENTITY_POOL_ID }}
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_AGENTIC_CHAT_STREAM_URL: ${{ secrets.VITE_AGENTIC_CHAT_STREAM_URL }}
         run: |
           npm ci
           npm run build

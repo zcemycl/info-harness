@@ -4,6 +4,16 @@ function apiBase(): string {
   return (import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8080").replace(/\/$/, "");
 }
 
+function streamBase(): string {
+  const configured = (import.meta.env.VITE_AGENTIC_CHAT_STREAM_URL ?? "").trim().replace(/\/$/, "");
+  return configured || apiBase();
+}
+
+function joinUrl(base: string, path: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${normalized}`;
+}
+
 let refreshInFlight: Promise<string | null> | null = null;
 
 function secondsLeft(token: string): number | null {
@@ -40,5 +50,12 @@ export async function apiFetch(token: string, path: string, init: RequestInit = 
   if (init.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  return fetch(`${apiBase()}${path}`, { ...init, headers });
+  return fetch(joinUrl(apiBase(), path), { ...init, headers });
+}
+
+export async function streamFetch(token: string, path: string): Promise<Response> {
+  const headers = new Headers();
+  headers.set("Authorization", `Bearer ${await sessionAccessToken(token)}`);
+  headers.set("Accept", "text/event-stream");
+  return fetch(joinUrl(streamBase(), path), { headers });
 }

@@ -15,9 +15,8 @@ _asgi = Mangum(app, lifespan="off")
 def handler(event: dict[str, Any], context: Any) -> Any:
     """Serve FastAPI, or run one chat turn when ``action`` is ``research``.
 
-    The CLI stays ``src/main.py``. On Lambda, ``POST /messages`` invokes this
-    function asynchronously so the HTTP response returns a ``run_id`` while
-    PEWE continues (up to the function timeout).
+    The CLI stays ``src/main.py``. The container entrypoint is uvicorn, so
+    Lambda research runs ``POST /internal/research`` instead of this branch.
     """
     if event.get("action") == "research":
         run_chat_turn(

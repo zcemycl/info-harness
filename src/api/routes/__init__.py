@@ -13,6 +13,7 @@ from api.routes.get_run import router as get_run_router
 from api.routes.health import router as health_router
 from api.routes.list_chats import router as list_chats_router
 from api.routes.post_message import router as post_message_router
+from api.routes.run_research import router as run_research_router
 from api.routes.stream_events import router as stream_events_router
 
 
@@ -29,6 +30,7 @@ def mount_routes(app: FastAPI) -> None:
         get_run_router,
         get_events_router,
         stream_events_router,
+        run_research_router,
     )
     for router in routers:
         protected.include_router(router)

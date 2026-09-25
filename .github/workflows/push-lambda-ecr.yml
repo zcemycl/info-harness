@@ -57,14 +57,20 @@ jobs:
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
           echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
 
-      - name: Update Lambda function
+      - name: Update Lambda functions
         env:
           LAMBDA_FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_NAME }}
+          LAMBDA_STREAM_FUNCTION_NAME: ${{ secrets.LAMBDA_STREAM_FUNCTION_NAME }}
           IMAGE_URI: ${{ steps.build.outputs.image_uri }}
         run: |
-          aws lambda update-function-code \
-            --function-name "$LAMBDA_FUNCTION_NAME" \
-            --image-uri "$IMAGE_URI" \
-            --publish > /dev/null
-          aws lambda wait function-updated-v2 \
-            --function-name "$LAMBDA_FUNCTION_NAME"
+          update() {
+            aws lambda update-function-code \
+              --function-name "$1" \
+              --image-uri "$IMAGE_URI" \
+              --publish > /dev/null
+            aws lambda wait function-updated-v2 \
+              --function-name "$1"
+          }
+          update "$LAMBDA_FUNCTION_NAME"
+          stream="${LAMBDA_STREAM_FUNCTION_NAME:-${LAMBDA_FUNCTION_NAME}-stream}"
+          update "$stream"

@@ -5,14 +5,13 @@ from __future__ import annotations
 from pathlib import Path
 
 from model.research.diary_entry import DiaryEntry
-from tools.diary.default_diary_dir import DEFAULT_DIARY_DIR
 from tools.diary.resolve_diary_path import resolve_diary_path
 
 
 def read_diary(
     path: str,
     *,
-    diary_dir: Path = DEFAULT_DIARY_DIR,
+    diary_dir: Path | None = None,
 ) -> DiaryEntry:
     """Load and validate a diary JSON file under ``diary_dir``.
 
