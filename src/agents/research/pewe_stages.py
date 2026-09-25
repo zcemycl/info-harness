@@ -139,6 +139,7 @@ def run_evaluator_stage(
             pack=pack,
             answer_text=answer_text,
             memory=memory,
+            synthesis_path=_writer_path(stage_answers),
         )
         entry = eval_to_diary_entry(evaluation)
         write_diary(entry, name_prefix=f"{run_id}/research")
@@ -155,3 +156,10 @@ def run_evaluator_stage(
         )
         trace_info("decision", decision=evaluation.decision.value)
         return evaluation
+
+
+def _writer_path(stage_answers: list[AgentAnswer]) -> str | None:
+    for item in reversed(stage_answers):
+        if item.agent == "writer" and item.path:
+            return item.path
+    return None

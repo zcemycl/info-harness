@@ -17,6 +17,10 @@ class TriedIdea(BaseModel):
     loop: int = Field(ge=1)
     status: str = Field(description="ok | incomplete | error")
     summary: str = Field(default="", description="Short outcome summary")
+    answer_path: str | None = Field(
+        default=None,
+        description="Diary path of the full specialist answer",
+    )
 
 
 class SettledWorkstream(BaseModel):
@@ -27,6 +31,10 @@ class SettledWorkstream(BaseModel):
     focus: str
     answer_summary: str
     fingerprint: str
+    answer_path: str | None = Field(
+        default=None,
+        description="Diary path of the full specialist answer",
+    )
 
 
 class ResearchMemory(BaseModel):

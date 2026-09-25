@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 
 from agents.chat_model import chat_model
+from agents.invoke_schema_with_reader import invoke_schema_with_reader
 from model.pubmed.pubmed_evidence_note import PubmedEvidenceNote
 from model.research.diary_entry import DiaryEntry
 from prompt.load_prompt import load_prompt
@@ -20,26 +21,16 @@ def evaluate_pubmed_loop(
 ) -> DiaryEntry:
     """Ask the evaluator LLM for a DiaryEntry decision."""
     llm = chat_model(model_env="OPENROUTER_FDA_SPECIALIST_MODEL")
-    structured = llm.with_structured_output(DiaryEntry)
     payload = {
         "brief": brief,
         "loop": loop,
         "evidence": compact_evidence_notes(evidence),
         "failures": failures or [],
     }
-    result = structured.invoke(
-        [
-            {
-                "role": "system",
-                "content": load_prompt("pubmed", "specialist_evaluator.md"),
-            },
-            {
-                "role": "user",
-                "content": json.dumps(payload, indent=2, default=str),
-            },
-        ]
-    )
-    entry = (
-        result if isinstance(result, DiaryEntry) else DiaryEntry.model_validate(result)
+    entry = invoke_schema_with_reader(
+        llm,
+        DiaryEntry,
+        system=load_prompt("pubmed", "specialist_evaluator.md"),
+        user=json.dumps(payload, indent=2, default=str),
     )
     return entry.model_copy(update={"loop": loop})

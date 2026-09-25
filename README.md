@@ -2,7 +2,7 @@
 
 CLI and agent harness for biomedical research workflows: FDA labels, ClinicalTrials.gov, ICD therapeutic areas, and PubMed — composed as nested **PEWE** loops.
 
-**PEWE** = **P**lanner → **E**xecutor → **W**riter → **E**valuator. The same rhythm runs at two scales: an *outer* research loop that picks specialists, and *inner* specialist loops that dispatch workers.
+**PEWE** = **P**lanner → **E**xecutor → **W**riter → **E**valuator. The same rhythm runs at two scales: an _outer_ research loop that picks specialists, and _inner_ specialist loops that dispatch workers.
 
 ## Prerequisites
 
@@ -31,11 +31,11 @@ Full command list → [`docs/commands.md`](docs/commands.md) · Folder map → [
 
 Research is not a single agent call. It is a **loop of loops**:
 
-| Layer | Role | PEWE meaning |
-|-------|------|----------------|
-| **Outer — research** | Decompose the brief into specialist workstreams; synthesize across domains; decide continue / replan / complete | Planner picks specialists; executor *spawns* them; writer synthesizes the pack; evaluator gates the next outer loop |
-| **Inner — specialist** | Own one domain (FDA, CTG, ICD-TA, PubMed) until evidence is good enough | Planner picks worker tasks; executor runs them; writer turns pages into notes; evaluator gates the next inner loop |
-| **Workers** | Thin tool agents — one HTTP / HC axis each | No PEWE of their own; called by the specialist executor |
+| Layer                  | Role                                                                                                            | PEWE meaning                                                                                                        |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Outer — research**   | Decompose the brief into specialist workstreams; synthesize across domains; decide continue / replan / complete | Planner picks specialists; executor _spawns_ them; writer synthesizes the pack; evaluator gates the next outer loop |
+| **Inner — specialist** | Own one domain (FDA, CTG, ICD-TA, PubMed) until evidence is good enough                                         | Planner picks worker tasks; executor runs them; writer turns pages into notes; evaluator gates the next inner loop  |
+| **Workers**            | Thin tool agents — one HTTP / HC axis each                                                                      | No PEWE of their own; called by the specialist executor                                                             |
 
 ```mermaid
 flowchart TB
@@ -214,7 +214,7 @@ flowchart LR
   B -->|yes| E[Settle workstream]
 ```
 
-- **Planner** sees settled workstreams, tried-idea fingerprints, and open gaps — so loop *n+1* does not replay loop *n*.
+- **Planner** sees settled workstreams, tried-idea fingerprints, and open gaps — so loop _n+1_ does not replay loop _n_.
 - **Evaluator** chooses `complete` / `continue` / `replan`; coverage enforcers can force continue when NCTs or PMIDs are missing from the pack.
 - **Writer** is the only stage that speaks to the user (outer) or accumulates durable notes (inner).
 
@@ -246,17 +246,17 @@ flowchart LR
 
 ### `DiaryEntry` fields
 
-| Field | Role |
-|-------|------|
-| `loop` | Which PEWE pass produced this entry |
-| `observations` | What happened this loop (neutral facts) |
-| `successful_actions` | What worked — do not undo |
-| `failures` | What broke (HTTP, empty pages, bad ids) |
-| `evidence_gaps` | What the brief still needs |
-| `contradictions` | Conflicting specialist / worker signals |
-| `lessons` | Durable takeaways the next planner must keep |
+| Field                      | Role                                              |
+| -------------------------- | ------------------------------------------------- |
+| `loop`                     | Which PEWE pass produced this entry               |
+| `observations`             | What happened this loop (neutral facts)           |
+| `successful_actions`       | What worked — do not undo                         |
+| `failures`                 | What broke (HTTP, empty pages, bad ids)           |
+| `evidence_gaps`            | What the brief still needs                        |
+| `contradictions`           | Conflicting specialist / worker signals           |
+| `lessons`                  | Durable takeaways the next planner must keep      |
 | `recommended_next_actions` | Concrete next moves (often named NCT/PMID digits) |
-| `decision` | `continue` · `replan` · `complete` |
+| `decision`                 | `continue` · `replan` · `complete`                |
 
 ```mermaid
 flowchart TB
@@ -277,9 +277,9 @@ flowchart TB
 
 ### Why it matters
 
-1. **Closes the PEWE circuit** — Evaluator → diary → Planner is the only feedback channel. Stage answers are for the *next stage in the same loop*; the diary is for the *next loop*.
+1. **Closes the PEWE circuit** — Evaluator → diary → Planner is the only feedback channel. Stage answers are for the _next stage in the same loop_; the diary is for the _next loop_.
 2. **Stops thrashing** — Planners are told what already succeeded, failed, and was tried. Outer memory adds fingerprints so the same focus/seeds are not replayed as “new.”
-3. **Separates judgment from evidence** — Evidence notes hold *what we found*; the diary holds *what that means for planning*. Mixing them makes synth noisy and replanning vague.
+3. **Separates judgment from evidence** — Evidence notes hold _what we found_; the diary holds _what that means for planning_. Mixing them makes synth noisy and replanning vague.
 4. **Same contract, two scales** — Inner specialists write `DiaryEntry` directly. Outer research writes the same spine plus `next_briefs` / `reject_directions` / `force_rerun_workstream_ids` on `ResearchEvalResult`, then persists the shared diary fields for the run.
 
 Entries are append-only per run (`write_diary`); planners receive the growing list (and outer `diary_tail` in memory prompts) so history compounds instead of resetting.
@@ -288,11 +288,11 @@ Entries are append-only per run (`write_diary`); planners receive the growing li
 
 ## Docs index
 
-| Doc | Contents |
-|-----|----------|
-| [`docs/commands.md`](docs/commands.md) | HTTP, agent, and eval CLI examples |
-| [`docs/layout.md`](docs/layout.md) | `src/` folder map and conventions |
-| [`src/cli/readme.md`](src/cli/readme.md) | CLI packaging rules |
+| Doc                                      | Contents                           |
+| ---------------------------------------- | ---------------------------------- |
+| [`docs/commands.md`](docs/commands.md)   | HTTP, agent, and eval CLI examples |
+| [`docs/layout.md`](docs/layout.md)       | `src/` folder map and conventions  |
+| [`src/cli/readme.md`](src/cli/readme.md) | CLI packaging rules                |
 
 CI lint: [`.github/workflows/lint.yml`](.github/workflows/lint.yml).
 
@@ -303,7 +303,7 @@ CI lint: [`.github/workflows/lint.yml`](.github/workflows/lint.yml).
 The CLI is unchanged (`src/main.py`). The chat UI and Lambda image share the same research pipeline.
 
 ```bash
-uv run uvicorn api.app:app --host 0.0.0.0 --port 8080
+uv run uvicorn api.app:app --host 0.0.0.0 --port 8080 --reload
 cd web && npm install && npm run dev
 ```
 

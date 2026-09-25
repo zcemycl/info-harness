@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 
 from agents.chat_model import chat_model
+from agents.research.invoke_text_with_reader import invoke_text_with_reader
 from model.research.research_pack import ResearchPack
 from model.research.research_plan import ResearchPlan
 from prompt.load_prompt import load_prompt
@@ -24,24 +25,19 @@ def write_synthesis(
         "nct_source_priority": prefer_ctg_or_fda(pack),
         "outcomes": [
             {
-                "workstream_id": o.workstream_id,
-                "specialist": o.specialist.value,
-                "focus": o.brief.focus,
-                "status": o.status.value,
-                "answer": o.answer.answer,
-                "error": o.error,
+                "workstream_id": item.workstream_id,
+                "specialist": item.specialist.value,
+                "focus": item.brief.focus,
+                "status": item.status.value,
+                "answer_path": item.answer.path,
+                "total_chars": len(item.answer.answer or ""),
+                "error": item.error,
             }
-            for o in pack.outcomes
+            for item in pack.outcomes
         ],
     }
-    response = llm.invoke(
-        [
-            {"role": "system", "content": load_prompt("research", "writer.md")},
-            {
-                "role": "user",
-                "content": json.dumps(payload, indent=2, default=str),
-            },
-        ]
+    return invoke_text_with_reader(
+        llm,
+        system=load_prompt("research", "writer.md"),
+        user=json.dumps(payload, indent=2, default=str),
     )
-    content = response.content
-    return content if isinstance(content, str) else str(content)
