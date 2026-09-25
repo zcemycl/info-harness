@@ -65,6 +65,6 @@ jobs:
           aws lambda update-function-code \
             --function-name "$LAMBDA_FUNCTION_NAME" \
             --image-uri "$IMAGE_URI" \
-            --publish
+            --publish > /dev/null
           aws lambda wait function-updated-v2 \
             --function-name "$LAMBDA_FUNCTION_NAME"
