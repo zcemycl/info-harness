@@ -1,4 +1,4 @@
-"""FastAPI application. Local: uvicorn. Lambda: ``api.lambda_handler.handler``."""
+"""FastAPI application. Local: uvicorn. Lambda: Web Adapter in front of uvicorn."""
 
 from __future__ import annotations
 

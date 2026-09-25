@@ -8,6 +8,7 @@ import threading
 
 import boto3
 
+from api.research_invoke_event import research_invoke_event
 from pipeline.run_chat_turn import run_chat_turn
 from tools.chat.put_run_status import put_run_status
 
@@ -50,13 +51,7 @@ def _invoke(
     brief: str,
     access_token: str,
 ) -> None:
-    payload = {
-        "action": "research",
-        "chat_id": chat_id,
-        "run_id": run_id,
-        "brief": brief,
-        "access_token": access_token,
-    }
+    payload = research_invoke_event(chat_id, run_id, brief, access_token)
     try:
         boto3.client("lambda").invoke(
             FunctionName=function_name,

@@ -294,24 +294,49 @@ Entries are append-only per run (`write_diary`); planners receive the growing li
 | [`docs/layout.md`](docs/layout.md)       | `src/` folder map and conventions  |
 | [`src/cli/readme.md`](src/cli/readme.md) | CLI packaging rules                |
 
-CI: [`.github/workflows/lint.yml`](.github/workflows/lint.yml) runs Python lint and builds `web/`. On push it deploys `web/dist` to `gh-pages` with `VITE_APP_BASENAME=/info-harness`. Set repo secrets `VITE_COGNITO_USER_POOL_ID`, `VITE_COGNITO_USER_POOL_CLIENT_ID`, and `VITE_API_BASE_URL` (plus optional `VITE_COGNITO_REGION` and `VITE_COGNITO_IDENTITY_POOL_ID`).
-
 ---
 
 ## Web API (local or Lambda)
 
-The CLI is unchanged (`src/main.py`). The chat UI and Lambda image share the same research pipeline.
+The CLI stays `src/main.py`. The chat UI and the Lambda image share the same research pipeline. Copy [`web/.env.sample`](web/.env.sample) to `web/.env.local` and set the same `COGNITO_*` values as `.env`.
 
 ```bash
 uv run uvicorn api.app:app --host 0.0.0.0 --port 8080 --reload
 cd web && npm install && npm run dev
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000) and sign in with Cognito. The app sends that access token on every API call. FastAPI checks it against the same user pool, then the research run uses it for HC requests. CLI `cognito-login` is unchanged and still writes `.cognito_tokens.json` for commands that are not the web app.
+Open [http://localhost:3000](http://localhost:3000) and sign in with Cognito. FastAPI checks that access token, and the research run uses it for HC requests.
 
-Copy [`web/.env.sample`](web/.env.sample) to `web/.env.local` and set the same `COGNITO_*` values as `.env` plus `VITE_API_BASE_URL=http://127.0.0.1:8080`.
+Locally, leave `VITE_AGENTIC_CHAT_STREAM_URL` empty. Chat, polling, and the event stream all use `VITE_API_BASE_URL` (`http://127.0.0.1:8080`). Diary files stay under `data/diary`. Chat state stays under `data/chats`.
 
-- `POST /chats/{id}/messages` stores the prompt and starts a run. The brief is the prompt alone on the first turn, and **last assistant answer + next prompt** after that.
-- `GET /runs/{id}/events/stream` pushes PEWE stage lines (SSE). `GET /runs/{id}/events?after=` is the poll fallback. `GET /runs/{id}` returns the final answer.
-- On Lambda, the image runs `uvicorn api.app:app` behind the Lambda Web Adapter with `AWS_LWA_INVOKE_MODE=response_stream`, so stage events can stream. Chat objects go to `CHAT_S3_BUCKET` (or `data/chats` locally). Build: `DOCKER_BUILDKIT=1 docker build --ssh default -t info-harness .`
-- [`.github/workflows/push-lambda-ecr.yml`](.github/workflows/push-lambda-ecr.yml) builds that image on pushes to `main` (and `workflow_dispatch`), pushes it to ECR, and updates the Lambda function. Set repo secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `ECR_REGISTRY`, `LAMBDA_ECR_REPOSITORY`, `LAMBDA_FUNCTION_NAME`, and `PRIVATE_REPO_TOKEN` (`AWS_REGION` defaults to `eu-west-2`).
+```mermaid
+flowchart LR
+  localPage[localhost:3000]
+  uvicorn["uvicorn 127.0.0.1:8080"]
+  disk["data/diary and data/chats"]
+
+  localPage -->|"REST and GET /runs/id/events/stream"| uvicorn
+  uvicorn --> disk
+```
+
+In production the page uses both URLs. `VITE_API_BASE_URL` is the HTTP API: create, list, messages, `GET /runs/{id}`, and `GET /runs/{id}/events`. `VITE_AGENTIC_CHAT_STREAM_URL` is only `GET /runs/{id}/events/stream`. `POST /messages` returns a `run_id`, then the buffered function runs `POST /internal/research`. The first brief is the prompt. Later briefs are the last assistant answer plus the next prompt. Diary files stay on `/tmp/diary` and are discarded with the Lambda environment. History, stage events, and the final answer go to `CHAT_S3_BUCKET`.
+
+```mermaid
+flowchart LR
+  page[Static page]
+  apigw[HTTP API]
+  fnUrl[Function URL]
+  restFn[agentic-chat buffered]
+  streamFn[agentic-chat-stream]
+  tmp["/tmp/diary"]
+  s3[(S3 history events result)]
+
+  page -->|VITE_API_BASE_URL| apigw
+  page -->|VITE_AGENTIC_CHAT_STREAM_URL| fnUrl
+  apigw --> restFn
+  fnUrl --> streamFn
+  restFn -->|"async POST /internal/research"| restFn
+  restFn --> tmp
+  restFn --> s3
+  streamFn --> s3
+```

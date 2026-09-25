@@ -17,7 +17,7 @@ class ObjectStore:
         load_dotenv()
         self.bucket = os.getenv("CHAT_S3_BUCKET", "").strip()
         self.prefix = os.getenv("CHAT_S3_PREFIX", "").strip("/")
-        self.root = Path(os.getenv("CHAT_DATA_DIR", "data/chats"))
+        self.root = _local_root()
         self._client = boto3.client("s3") if self.bucket else None
 
     def put_text(self, key: str, text: str) -> None:
@@ -105,6 +105,15 @@ class ObjectStore:
 def open_object_store() -> ObjectStore:
     """Open a store from the current environment."""
     return ObjectStore()
+
+
+def _local_root() -> Path:
+    configured = os.getenv("CHAT_DATA_DIR", "").strip()
+    if configured:
+        return Path(configured)
+    if os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+        return Path("/tmp/chats")
+    return Path("data/chats")
 
 
 def _safe_key(key: str) -> str:

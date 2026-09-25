@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1
-# FastAPI on AWS Lambda via the Web Adapter (response streaming).
+# FastAPI on AWS Lambda via the Web Adapter.
+# The image defaults to buffered invoke so API Gateway REST routes succeed.
+# The stream Lambda overrides AWS_LWA_INVOKE_MODE=response_stream.
 # The CLI stays `src/main.py` and is not the container command.
 #
 # Build (private hc-datacore via SSH):
@@ -41,7 +43,7 @@ COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt
 
 ENV PORT=8000
 ENV AWS_LWA_PORT=8000
-ENV AWS_LWA_INVOKE_MODE=response_stream
+ENV AWS_LWA_INVOKE_MODE=buffered
 ENV AWS_LWA_READINESS_CHECK_PATH=/health
 ENV AWS_LWA_READINESS_CHECK_PORT=8000
 

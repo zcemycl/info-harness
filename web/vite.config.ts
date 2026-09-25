@@ -12,7 +12,9 @@ export default defineConfig(({ mode }) => {
   return {
     base: appBasename ? `${appBasename}/` : "/",
     plugins: [react()],
-    server: { port: 3000 },
+    server: {
+      port: 3000,
+    },
     build: {
       rollupOptions: {
         input: {
