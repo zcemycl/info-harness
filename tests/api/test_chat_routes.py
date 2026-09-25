@@ -8,7 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.app import app
-from api.require_access_token import require_access_token
+from api.require_access_token import ChatCaller, require_access_token
 
 
 def test_chat_message_stores_follow_up_brief(
@@ -34,7 +34,10 @@ def test_chat_message_stores_follow_up_brief(
         started["token"] = access_token
 
     monkeypatch.setattr("api.routes.post_message.start_research", fake_start)
-    app.dependency_overrides[require_access_token] = lambda: "test-token"
+    app.dependency_overrides[require_access_token] = lambda: ChatCaller(
+        "test-token",
+        "test-user",
+    )
     client = TestClient(app)
     created = client.post("/chats")
     assert created.status_code == 200
@@ -46,7 +49,7 @@ def test_chat_message_stores_follow_up_brief(
     assert first.status_code == 200
     assert started["brief"] == "Keytruda indications"
 
-    history_path = tmp_path / "chats" / chat_id / "history.json"
+    history_path = tmp_path / "users" / "test-user" / "chats" / chat_id / "history.json"
     history_path.write_text(
         '{"messages": ['
         '{"role": "user", "content": "Keytruda indications",'
@@ -76,7 +79,10 @@ def test_delete_chat_removes_the_session(
 ) -> None:
     monkeypatch.setenv("CHAT_DATA_DIR", str(tmp_path))
     monkeypatch.setenv("CHAT_S3_BUCKET", "")
-    app.dependency_overrides[require_access_token] = lambda: "test-token"
+    app.dependency_overrides[require_access_token] = lambda: ChatCaller(
+        "test-token",
+        "test-user",
+    )
     client = TestClient(app)
     created = client.post("/chats")
     chat_id = created.json()["chat_id"]

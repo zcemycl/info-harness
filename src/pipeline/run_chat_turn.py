@@ -7,11 +7,13 @@ from model.research.agent_answer import AgentAnswer
 from pipeline.run_research import run_research_pipeline
 from tools.chat.append_message import append_message
 from tools.chat.append_run_event import append_run_event
+from tools.chat.bind_chat_owner import bind_chat_owner
 from tools.chat.put_run_result import put_run_result
 from tools.chat.put_run_status import put_run_status
 from tools.chat.stage_events import bind_stage_events
 from tools.chat.utc_now import utc_now
 from tools.cognito.bind_access_token import bind_access_token
+from tools.cognito.owner_sub_from_token import owner_sub_from_token
 from tools.trace_call import trace_info
 
 
@@ -24,8 +26,9 @@ def run_chat_turn(
 ) -> None:
     """Execute PEWE, stream stage events, then store the final answer."""
     if access_token:
-        with bind_access_token(access_token):
-            _execute(chat_id, run_id, brief)
+        with bind_chat_owner(owner_sub_from_token(access_token)):
+            with bind_access_token(access_token):
+                _execute(chat_id, run_id, brief)
         return
     _execute(chat_id, run_id, brief)
 

@@ -14,6 +14,8 @@ export function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const token = accessToken ?? "";
 
+  const accountId = user?.userId ?? "";
+
   const loadChats = useCallback(async () => {
     const response = await apiFetch(token, "/chats");
     if (!response.ok) throw new Error(await response.text());
@@ -32,8 +34,16 @@ export function ChatPage() {
   );
 
   useEffect(() => {
-    void loadChats().catch((err: unknown) => setError(err instanceof Error ? err.message : "Failed to load chats"));
-  }, [loadChats]);
+    setChatId("");
+    setMessages([]);
+    setStages([]);
+    setChats([]);
+    setError(null);
+    if (!accountId) return;
+    void loadChats().catch((err: unknown) =>
+      setError(err instanceof Error ? err.message : "Failed to load chats"),
+    );
+  }, [accountId, loadChats]);
 
   async function removeChat(id: string) {
     setError(null);
