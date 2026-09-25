@@ -164,6 +164,11 @@ venv.bak/
 .DS_Store
 data/embeddings/
 data/diary/
+data/chats/
+web/node_modules/
+web/dist/
+web/.env.local
+web/.env.*.local
 
 # Spyder project settings
 .spyderproject

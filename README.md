@@ -295,3 +295,22 @@ Entries are append-only per run (`write_diary`); planners receive the growing li
 | [`src/cli/readme.md`](src/cli/readme.md) | CLI packaging rules |
 
 CI lint: [`.github/workflows/lint.yml`](.github/workflows/lint.yml).
+
+---
+
+## Web API (local or Lambda)
+
+The CLI is unchanged (`src/main.py`). The chat UI and Lambda image share the same research pipeline.
+
+```bash
+uv run uvicorn api.app:app --host 0.0.0.0 --port 8080
+cd web && npm install && npm run dev
+```
+
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000) and sign in with Cognito. The app sends that access token on every API call. FastAPI checks it against the same user pool, then the research run uses it for HC requests. CLI `cognito-login` is unchanged and still writes `.cognito_tokens.json` for commands that are not the web app.
+
+Copy [`web/.env.sample`](web/.env.sample) to `web/.env.local` and set the same `COGNITO_*` values as `.env` plus `VITE_API_BASE_URL=http://127.0.0.1:8080`.
+
+- `POST /chats/{id}/messages` stores the prompt and starts a run. The brief is the prompt alone on the first turn, and **last assistant answer + next prompt** after that.
+- `GET /runs/{id}/events/stream` pushes PEWE stage lines (SSE). `GET /runs/{id}/events?after=` is the poll fallback. `GET /runs/{id}` returns the final answer.
+- On Lambda, the image command is `api.lambda_handler.handler`. HTTP stays FastAPI; a payload with `"action": "research"` runs the turn. Set the function to invoke itself asynchronously (`lambda:InvokeFunction`), or set `CHAT_INLINE_RESEARCH=1` only for local threads. Chat objects go to `CHAT_S3_BUCKET` (or `data/chats` locally). Build: `DOCKER_BUILDKIT=1 docker build --ssh default -t info-harness .`

@@ -1,0 +1,14 @@
+.venv
+.git
+.cursor
+data
+web
+tests
+.env
+.env.*
+.cognito_tokens.json
+**/__pycache__
+**/*.pyc
+.mypy_cache
+.pytest_cache
+.ruff_cache

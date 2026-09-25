@@ -10,6 +10,8 @@ Keep new code under `src/` with these folders. Do not invent parallel trees.
 | Folder | Purpose |
 |--------|---------|
 | `src/cli/` | Typer CLI command handlers — **one command per file** |
+| `src/api/` | FastAPI app for local uvicorn and Lambda (Mangum). Not a Typer command |
+| `web/` | Static chatbot (GitHub Pages) |
 | `src/hc_http/` | HTTP clients / request helpers (HC + PubMed), **by domain folder** |
 | `src/pipeline/` | Ingestion, preprocessing, and orchestration steps only |
 | `src/model/` | Pydantic models / schemas — domain folders (`fda/`, `ctg/`, `pubmed/`) for agent tool I/O |
@@ -36,6 +38,8 @@ src/
   tools/                  # agent tools by domain
     fda/ ctg/ therapeutic_area/ pubmed/
   examples/               # few-shot examples
+  api/                    # FastAPI; Lambda handler api.lambda_handler
+web/                      # GitHub Pages chatbot
 ```
 
 ## Rules
@@ -49,3 +53,4 @@ src/
 - Do not bury few-shot examples in prompts as unstructured blobs when they belong in `examples/`.
 - Reuse existing modules in these folders before adding new files.
 - Do **not** name a top-level package `http` — it shadows the Python stdlib.
+- Keep the CLI at `src/main.py`. The web app calls `src/api/` and reuses `pipeline/` / `tools/`; do not move agent commands into FastAPI.
