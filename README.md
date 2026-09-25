@@ -294,7 +294,7 @@ Entries are append-only per run (`write_diary`); planners receive the growing li
 | [`docs/layout.md`](docs/layout.md)       | `src/` folder map and conventions  |
 | [`src/cli/readme.md`](src/cli/readme.md) | CLI packaging rules                |
 
-CI lint: [`.github/workflows/lint.yml`](.github/workflows/lint.yml).
+CI: [`.github/workflows/lint.yml`](.github/workflows/lint.yml) runs Python lint and builds `web/`. On push it deploys `web/dist` to `gh-pages` with `VITE_APP_BASENAME=/info-harness`. Set repo secrets `VITE_COGNITO_USER_POOL_ID`, `VITE_COGNITO_USER_POOL_CLIENT_ID`, and `VITE_API_BASE_URL` (plus optional `VITE_COGNITO_REGION` and `VITE_COGNITO_IDENTITY_POOL_ID`).
 
 ---
 

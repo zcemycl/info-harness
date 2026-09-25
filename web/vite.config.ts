@@ -13,6 +13,15 @@ export default defineConfig(({ mode }) => {
     base: appBasename ? `${appBasename}/` : "/",
     plugins: [react()],
     server: { port: 3000 },
+    build: {
+      rollupOptions: {
+        input: {
+          main: path.resolve(__dirname, "index.html"),
+          notfound: path.resolve(__dirname, "404.html"),
+        },
+      },
+      assetsDir: "assets",
+    },
     resolve: {
       alias: { "@": path.resolve(__dirname, "./src") },
     },
