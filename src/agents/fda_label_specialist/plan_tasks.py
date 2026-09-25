@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 
 from agents.chat_model import chat_model
+from agents.invoke_schema_with_reader import invoke_schema_with_reader
 from model.research.diary_entry import DiaryEntry
 from model.research.evidence_note import EvidenceNote
 from model.research.planner_output import PlannerOutput
@@ -22,7 +23,6 @@ def plan_fda_tasks(
 ) -> PlannerOutput:
     """Ask the planner LLM for WorkerPlan tasks (fixed worker/attr enums)."""
     llm = chat_model(model_env="OPENROUTER_FDA_SPECIALIST_MODEL")
-    structured = llm.with_structured_output(PlannerOutput)
     payload = {
         "brief": brief,
         "loop": loop,
@@ -40,15 +40,9 @@ def plan_fda_tasks(
         "latest_diary": diary[-1].model_dump(mode="json") if diary else None,
         "evidence_tail": compact_evidence_notes(evidence),
     }
-    result = structured.invoke(
-        [
-            {"role": "system", "content": load_prompt("fda", "specialist_planner.md")},
-            {
-                "role": "user",
-                "content": json.dumps(payload, indent=2, default=str),
-            },
-        ]
+    return invoke_schema_with_reader(
+        llm,
+        PlannerOutput,
+        system=load_prompt("fda", "specialist_planner.md"),
+        user=json.dumps(payload, indent=2, default=str),
     )
-    if isinstance(result, PlannerOutput):
-        return result
-    return PlannerOutput.model_validate(result)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from agents.chat_model import chat_model
+from agents.invoke_schema_with_reader import invoke_schema_with_reader
 from agents.research.apply_eval_feedback import apply_eval_feedback
 from agents.research.build_planner_input import build_planner_input
 from agents.research.ensure_workstream_ids import ensure_workstream_ids
@@ -31,21 +32,17 @@ def plan_workstreams(
 ) -> ResearchPlan:
     """Ask the planner LLM for workstreams; apply memory guards."""
     llm = chat_model(model_env="OPENROUTER_RESEARCH_PLANNER_MODEL")
-    structured = llm.with_structured_output(ResearchPlan)
-    result = structured.invoke(
-        [
-            {"role": "system", "content": load_prompt("research", "planner.md")},
-            {
-                "role": "user",
-                "content": build_planner_input(
-                    brief,
-                    loop=loop,
-                    diary=diary,
-                    memory=memory,
-                    eval_feedback=eval_feedback,
-                ),
-            },
-        ]
+    result = invoke_schema_with_reader(
+        llm,
+        ResearchPlan,
+        system=load_prompt("research", "planner.md"),
+        user=build_planner_input(
+            brief,
+            loop=loop,
+            diary=diary,
+            memory=memory,
+            eval_feedback=eval_feedback,
+        ),
     )
     plan = (
         result

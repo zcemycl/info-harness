@@ -55,6 +55,7 @@ def update_research_memory(
             loop=loop,
             status=outcome.status.value,
             summary=summary,
+            answer_path=outcome.answer.path,
         )
         if outcome.status is AnswerStatus.OK and outcome.workstream_id not in force:
             settled[outcome.workstream_id] = SettledWorkstream(
@@ -63,6 +64,7 @@ def update_research_memory(
                 focus=outcome.brief.focus,
                 answer_summary=summary,
                 fingerprint=outcome.idea_fingerprint,
+                answer_path=outcome.answer.path,
             )
         else:
             settled.pop(outcome.workstream_id, None)

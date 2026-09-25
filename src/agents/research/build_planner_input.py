@@ -47,6 +47,7 @@ def build_planner_input(
             "ctg_must_list_known_ncts_in_focus_and_seeds": True,
             "pubmed_only_with_known_pmids": True,
             "never_invent_pmids": True,
+            "read_answer_path_when_summary_is_short": True,
         },
     }
     if eval_feedback is not None:

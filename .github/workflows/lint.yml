@@ -3,9 +3,14 @@ name: Lint
 on:
   push:
     branches:
-      - "*"
+      - "**"
   pull_request:
   workflow_dispatch:
+
+env:
+  node_version: "20.19.5"
+  deploy_folder: web/dist
+  vite_app_basename: /info-harness
 
 jobs:
   lint:
@@ -39,3 +44,41 @@ jobs:
 
       - name: mypy
         run: uv run mypy
+
+  build:
+    name: web static
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.node_version }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install and build
+        working-directory: web
+        env:
+          VITE_APP_BASENAME: ${{ env.vite_app_basename }}
+          VITE_COGNITO_USER_POOL_ID: ${{ secrets.VITE_COGNITO_USER_POOL_ID }}
+          VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.VITE_COGNITO_USER_POOL_CLIENT_ID }}
+          VITE_COGNITO_REGION: ${{ secrets.VITE_COGNITO_REGION || 'eu-west-2' }}
+          VITE_COGNITO_IDENTITY_POOL_ID: ${{ secrets.VITE_COGNITO_IDENTITY_POOL_ID }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to GH Page
+        if: github.event_name == 'push'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: ${{ env.deploy_folder }}

@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: "DM Sans", sans-serif;
+}
+
+.login-aside-glow {
+  position: absolute;
+  inset: -20% -30% auto auto;
+  width: 70%;
+  height: 70%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(125, 206, 160, 0.25), transparent);
+  pointer-events: none;
+}
+
+.markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  margin: 0.8rem 0 0.4rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.markdown h1 {
+  font-size: 1.25rem;
+}
+
+.markdown h2 {
+  font-size: 1.1rem;
+}
+
+.markdown h3,
+.markdown h4 {
+  font-size: 1rem;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol {
+  margin: 0.4rem 0;
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 1.25rem;
+}
+
+.markdown li {
+  margin: 0.2rem 0;
+}
+
+.markdown table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.markdown th,
+.markdown td {
+  border: 1px solid #d9cbb3;
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown th {
+  background: #f4f7f5;
+  font-weight: 700;
+}

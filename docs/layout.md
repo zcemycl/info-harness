@@ -25,8 +25,11 @@ src/
     ctg/
     therapeutic_area/
     pubmed/
+    chat/          # chat history, briefs, run events
+  api/             # FastAPI (local uvicorn + Lambda Mangum)
   examples/        # few-shot examples + eval fixtures
 tests/
+web/               # static chatbot for GitHub Pages
 data/              # local inputs (gitignored artefacts as needed)
 docs/
   commands.md
@@ -44,6 +47,8 @@ docs/
 | `src/prompt/` | LLM prompt templates |
 | `src/agents/` | Agents SDK agents — one agent per subfolder |
 | `src/tools/` | Callable tools wrapping `hc_http/` |
+| `src/api/` | FastAPI app; Lambda handler `api.lambda_handler.handler`. CLI stays `src/main.py` |
+| `web/` | Static chatbot |
 | `src/examples/` | Few-shot examples and eval cases |
 
 Do **not** name a top-level package `http` — it shadows the Python stdlib.

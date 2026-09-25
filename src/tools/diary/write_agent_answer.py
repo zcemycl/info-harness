@@ -28,4 +28,12 @@ def write_agent_answer(
         update={"path": path.relative_to(Path.cwd().resolve()).as_posix()}
     )
     path.write_text(written.model_dump_json(indent=2) + "\n", encoding="utf-8")
+    _notify_stage(written)
     return written
+
+
+def _notify_stage(entry: AgentAnswer) -> None:
+    """Push a stage event when a chat run bound a listener. CLI runs no-op."""
+    from tools.chat.stage_events import notify_stage
+
+    notify_stage(entry)

@@ -18,18 +18,31 @@ def resolve_diary_path(
 
     root = diary_dir.expanduser().resolve()
     raw = Path(path).expanduser()
-    candidates: list[Path] = []
     if raw.is_absolute():
-        candidates.append(raw.resolve())
-    else:
-        candidates.append((Path.cwd() / raw).resolve())
-        candidates.append((root / raw).resolve())
-        candidates.append((root / raw.name).resolve())
+        return _existing(_contained(raw.resolve(), root, path), path)
 
-    for resolved in candidates:
-        if resolved.is_relative_to(root) and resolved.is_file():
-            return resolved
-
-    if any(not candidate.is_relative_to(root) for candidate in candidates):
-        raise ValueError(f"path escapes diary_dir: {path!r}")
+    anchored = _contained((root / raw).resolve(), root, path)
+    for candidate in (
+        anchored,
+        (root / raw.name).resolve(),
+        (Path.cwd() / raw).resolve(),
+    ):
+        if _inside(candidate, root) and candidate.is_file():
+            return candidate
     raise FileNotFoundError(f"Diary file not found: {path}")
+
+
+def _contained(resolved: Path, root: Path, path: str) -> Path:
+    if not _inside(resolved, root):
+        raise ValueError(f"path escapes diary_dir: {path!r}")
+    return resolved
+
+
+def _existing(resolved: Path, path: str) -> Path:
+    if not resolved.is_file():
+        raise FileNotFoundError(f"Diary file not found: {path}")
+    return resolved
+
+
+def _inside(resolved: Path, root: Path) -> bool:
+    return resolved.is_relative_to(root)
