@@ -40,6 +40,7 @@ function pushLoop(
       meta: loop.ended ? "done" : "open",
       detail: "",
       accent,
+      running: false,
       expanded: false,
       compact: loop.tier === "inner",
       comboId: parent ?? "",
@@ -48,17 +49,25 @@ function pushLoop(
   }
   const box = `box-${loop.id}`;
   model.combos.push({ id: box, parent, label, collapsed: false, tier: loop.tier, accent });
-  let previous: string | null = null;
-  for (const step of loop.steps) {
+  let spine: string | null = null;
+  for (const name of ["planner", "executor", "writer", "evaluator"]) {
+    const step = loop.steps.find((item) => item.stage === name);
+    if (!step) continue;
     model.cards.push({ ...step, comboId: box, expanded: openSteps[step.id] ?? step.id === active });
-    if (previous) model.edges.push({ id: `${previous}-${step.id}`, source: previous, target: step.id });
-    previous = step.id;
+    if (spine) model.edges.push({ id: `${spine}-${step.id}`, source: spine, target: step.id });
+    spine = step.id;
   }
   const executor = loop.steps.find((step) => step.stage === "executor");
-  for (const inner of loop.inners) {
-    const innerId = pushLoop(inner, box, openSteps, openLoops, active, model);
-    const anchor = executor?.id ?? previous;
-    if (anchor) model.edges.push({ id: `${anchor}-${innerId}`, source: anchor, target: innerId });
+  const writer = loop.steps.find((step) => step.stage === "writer");
+  const branches: string[] = [];
+  for (const worker of loop.workers) {
+    model.cards.push({ ...worker, comboId: box, expanded: openSteps[worker.id] ?? worker.id === active });
+    branches.push(worker.id);
+  }
+  for (const inner of loop.inners) branches.push(pushLoop(inner, box, openSteps, openLoops, active, model));
+  for (const branch of branches) {
+    if (executor) model.edges.push({ id: `${executor.id}-${branch}`, source: executor.id, target: branch });
+    if (writer) model.edges.push({ id: `${branch}-${writer.id}`, source: branch, target: writer.id });
   }
   return box;
 }

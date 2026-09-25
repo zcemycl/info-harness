@@ -33,6 +33,7 @@ export type RunEvent = {
   tier?: "outer" | "inner" | "worker" | null;
   domain?: string | null;
   stage?: string | null;
+  phase?: "start" | "end" | null;
   agent?: string | null;
   status?: string | null;
   summary?: string;

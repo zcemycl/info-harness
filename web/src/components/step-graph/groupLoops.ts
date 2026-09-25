@@ -12,6 +12,7 @@ export type RunStep = {
   meta: string;
   detail: string;
   accent: string;
+  running: boolean;
 };
 
 export type LoopBlock = {
@@ -21,11 +22,12 @@ export type LoopBlock = {
   loop: number;
   ended: boolean;
   steps: RunStep[];
+  workers: RunStep[];
   inners: LoopBlock[];
 };
 
 const INNER = new Set(["fda", "ctg", "pubmed", "icd"]);
-const PEWE = new Set(["planner", "executor", "writer", "evaluator"]);
+const PEWE = ["planner", "executor", "writer", "evaluator"];
 
 const ACCENT: Record<string, string> = {
   research: "#0c1f1a",
@@ -66,7 +68,7 @@ function inferred(event: RunEvent): { tier: RunTier; domain: string; stage: stri
   }
   const body = pathBody(event.path);
   const agent = event.agent?.trim() || "step";
-  const stage = body.length >= 3 && body[1]?.startsWith("loop-") ? body[2] : PEWE.has(agent) ? agent : null;
+  const stage = body.length >= 3 && body[1]?.startsWith("loop-") && PEWE.includes(body[2] ?? "") ? body[2] : PEWE.includes(agent) ? agent : null;
   const domain = body[0] || agent;
   const loop = body[1]?.startsWith("loop-") ? Number(body[1].slice(5)) || event.loop || null : event.loop ?? null;
   if (domain === "research" || agent === "research") return { tier: "outer", domain: "research", stage, loop };
@@ -77,24 +79,40 @@ function inferred(event: RunEvent): { tier: RunTier; domain: string; stage: stri
 function toStep(event: RunEvent): RunStep | null {
   if (event.type !== "stage" && event.type !== "error") return null;
   const scope = inferred(event);
-  const stage = scope.stage && PEWE.has(scope.stage) ? scope.stage : scope.tier === "worker" ? null : scope.stage;
-  const title = stage ? pretty(stage) : scope.tier === "worker" ? pretty(scope.domain) : "answer";
-  const status = event.status || event.type;
+  const stage = scope.stage && PEWE.includes(scope.stage) ? scope.stage : null;
+  if (scope.tier !== "worker" && !stage) return null;
+  const running = event.phase === "start";
+  const title = stage ? pretty(stage) : pretty(scope.domain);
   return {
-    id: `s${event.seq}`,
+    id: stage ? `pewe-${scope.tier}-${scope.domain}-${scope.loop ?? 1}-${stage}` : `s${event.seq}`,
     tier: scope.tier,
     domain: scope.domain,
     stage,
     loop: scope.loop,
     title,
-    meta: `${scope.tier} · ${status}`,
+    meta: running ? `${scope.tier} · running` : `${scope.tier} · ${event.status || event.type}`,
     detail: (event.summary || event.answer || "").trim() || "No details yet.",
     accent: event.type === "error" ? "#b42318" : (ACCENT[scope.domain] ?? ACCENT[hostDomain(scope.domain) ?? ""] ?? "#3d5a50"),
+    running,
   };
 }
 
 function block(tier: "outer" | "inner", domain: string, loop: number): LoopBlock {
-  return { id: `loop-${tier}-${domain}-${loop}`, tier, domain, loop, ended: false, steps: [], inners: [] };
+  return { id: `loop-${tier}-${domain}-${loop}`, tier, domain, loop, ended: false, steps: [], workers: [], inners: [] };
+}
+
+function remember(group: LoopBlock, step: RunStep): void {
+  const found = group.steps.find((item) => item.stage === step.stage);
+  if (!found) {
+    group.steps.push(step);
+  } else if (!step.running) {
+    found.running = false;
+    found.detail = step.detail;
+    found.meta = step.meta;
+  }
+  const evaluator = group.steps.find((item) => item.stage === "evaluator");
+  group.ended = Boolean(evaluator && !evaluator.running);
+  group.steps.sort((left, right) => PEWE.indexOf(left.stage ?? "") - PEWE.indexOf(right.stage ?? ""));
 }
 
 function hostInner(inners: LoopBlock[], domain: string): LoopBlock | undefined {
@@ -113,8 +131,7 @@ export function groupLoops(events: RunEvent[], forceEnded = false): LoopBlock[] 
     const step = toStep(event);
     if (!step) continue;
     if (step.tier === "worker") {
-      const host = hostInner(inners, hostDomain(step.domain) ?? "") ?? current;
-      host?.steps.push(step);
+      (hostInner(inners, hostDomain(step.domain) ?? "") ?? current)?.workers.push(step);
       continue;
     }
     const loop = step.loop ?? 1;
@@ -124,11 +141,9 @@ export function groupLoops(events: RunEvent[], forceEnded = false): LoopBlock[] 
       group = block(step.tier === "inner" ? "inner" : "outer", step.domain, loop);
       list.push(group);
       if (group.tier === "inner") (current ?? outers.at(-1))?.inners.push(group);
-      else current = group;
     }
     if (group.tier === "outer") current = group;
-    group.steps.push(step);
-    if (step.stage === "evaluator") group.ended = true;
+    remember(group, step);
   }
   if (forceEnded) {
     for (const outer of outers) {
@@ -157,8 +172,8 @@ export function activeStepId(loops: LoopBlock[], openLoops: Readonly<Record<stri
   let latest = "";
   const visit = (loop: LoopBlock) => {
     if (!loopExpanded(loop, openLoops)) return;
-    const last = loop.steps.at(-1);
-    if (last && !loop.ended) latest = last.id;
+    const live = loop.steps.find((step) => step.running) ?? (!loop.ended ? loop.steps.at(-1) : undefined);
+    if (live) latest = live.id;
     for (const inner of loop.inners) visit(inner);
   };
   for (const loop of loops) visit(loop);

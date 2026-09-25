@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal, cast
+
 from model.chat.run_event import RunEvent
 from model.research.agent_answer import AgentAnswer
 from pipeline.run_research import run_research_pipeline
@@ -47,6 +49,7 @@ def _execute(chat_id: str, run_id: str, brief: str) -> None:
                 tier=tier,
                 domain=domain,
                 stage=stage,
+                phase="end",
                 agent=entry.agent,
                 status=entry.status.value,
                 summary=_summary(entry.answer),
@@ -54,8 +57,38 @@ def _execute(chat_id: str, run_id: str, brief: str) -> None:
             )
         )
 
+    def _on_phase(
+        *,
+        tier: str,
+        domain: str,
+        stage: str,
+        loop: int | None,
+        phase: str,
+        summary: str,
+    ) -> None:
+        kind = cast(
+            Literal["outer", "inner", "worker"],
+            tier if tier in {"outer", "inner", "worker"} else "outer",
+        )
+        append_run_event(
+            RunEvent(
+                ts=utc_now(),
+                type="stage",
+                run_id=run_id,
+                chat_id=chat_id,
+                loop=loop,
+                tier=kind,
+                domain=domain,
+                stage=stage or None,
+                phase="start" if phase == "start" else "end",
+                agent=stage or None,
+                status="running" if phase == "start" else "ok",
+                summary=summary,
+            )
+        )
+
     try:
-        with bind_stage_events(_on_stage):
+        with bind_stage_events(_on_stage, on_phase=_on_phase):
             result = run_research_pipeline(brief, run_id=run_id)
         answer = result.answer.answer
         put_run_result(chat_id, run_id, answer=answer, loops=result.loops)

@@ -51,15 +51,23 @@ function LoopThread({
         <span className="font-semibold">
           {loop.tier} · {loop.domain} · loop {loop.loop}
         </span>
-        {loop.ended ? <span className="text-[#5a7a6c]">done</span> : null}
+        {loop.ended ? <span className="text-[#5a7a6c]">done</span> : loop.steps.some((step) => step.running) ? (
+          <span className="text-[#8a5a12]">running</span>
+        ) : null}
       </button>
       {open ? (
         <ul className={`space-y-1 border-l border-[#d9cbb3] pl-3 ${tight ? "mt-1" : "mt-2"}`}>
           {loop.steps.map((step) => (
             <li key={step.id}>
               <StepRow step={step} open={openSteps[step.id] ?? step.id === active} onToggle={onToggleStep} />
-              {step.stage === "executor"
-                ? loop.inners.map((inner) => (
+              {step.stage === "executor" ? (
+                <ul className="mt-1 space-y-1 border-l border-[#8aa396] pl-3">
+                  {loop.workers.map((worker) => (
+                    <li key={worker.id}>
+                      <StepRow step={worker} open={openSteps[worker.id] ?? false} onToggle={onToggleStep} />
+                    </li>
+                  ))}
+                  {loop.inners.map((inner) => (
                     <LoopThread
                       key={inner.id}
                       loop={inner}
@@ -69,13 +77,19 @@ function LoopThread({
                       onToggleLoop={onToggleLoop}
                       onToggleStep={onToggleStep}
                     />
-                  ))
-                : null}
+                  ))}
+                </ul>
+              ) : null}
             </li>
           ))}
-          {loop.steps.some((step) => step.stage === "executor")
-            ? null
-            : loop.inners.map((inner) => (
+          {loop.steps.some((step) => step.stage === "executor") ? null : (
+            <>
+              {loop.workers.map((worker) => (
+                <li key={worker.id}>
+                  <StepRow step={worker} open={openSteps[worker.id] ?? false} onToggle={onToggleStep} />
+                </li>
+              ))}
+              {loop.inners.map((inner) => (
                 <LoopThread
                   key={inner.id}
                   loop={inner}
@@ -86,6 +100,8 @@ function LoopThread({
                   onToggleStep={onToggleStep}
                 />
               ))}
+            </>
+          )}
         </ul>
       ) : null}
     </li>

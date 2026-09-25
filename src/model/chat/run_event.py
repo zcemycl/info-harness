@@ -24,3 +24,4 @@ class RunEvent(BaseModel):
     summary: str = ""
     answer: str | None = None
     path: str | None = None
+    phase: Literal["start", "end"] | None = None
