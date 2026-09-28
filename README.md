@@ -309,6 +309,22 @@ Open [http://localhost:3000](http://localhost:3000) and sign in with Cognito. Fa
 
 Locally, leave `VITE_AGENTIC_CHAT_STREAM_URL` empty. Chat, polling, and the event stream all use `VITE_API_BASE_URL` (`http://127.0.0.1:8080`). Diary files stay under `data/diary`. Chat state stays under `data/chats`.
 
+### Docker Compose
+
+Same local stack in containers. `src/`, `web/`, and `data/` are bind-mounted so edits reload without an image rebuild. DynamoDB Local is included for later use; the app does not read it yet.
+
+```bash
+docker compose up --build
+```
+
+| Service | URL | Mount |
+| --- | --- | --- |
+| web | http://localhost:3000 | `web/` (dependencies stay in a volume) |
+| api | http://localhost:8080 | `src/` and `data/` |
+| dynamodb | http://localhost:8000 | named volume `dynamodb_data` |
+
+The API container gets `DYNAMODB_ENDPOINT_URL=http://dynamodb:8000`. From the host, the same database is `http://127.0.0.1:8000`. The API image build reads `PRIVATE_REPO_TOKEN` from the root `.env` to install private `hc-datacore`. Rebuild `api` when Python dependencies change, and `web` when `web/package-lock.json` changes. The Lambda image at the repo-root `Dockerfile` is separate from this stack.
+
 ```mermaid
 flowchart LR
   localPage[localhost:3000]
