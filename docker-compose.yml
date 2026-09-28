@@ -1,0 +1,52 @@
+# Local stack. The Lambda image at ./Dockerfile is unchanged.
+#
+#   docker compose up --build
+#
+# The API image reads PRIVATE_REPO_TOKEN from the root .env for hc-datacore.
+
+services:
+  web:
+    build:
+      context: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "1000"
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+      args:
+        PRIVATE_REPO_TOKEN: ${PRIVATE_REPO_TOKEN:-}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PORT: "8080"
+      DYNAMODB_ENDPOINT_URL: http://dynamodb:8000
+      DYNAMODB_REGION: ${COGNITO_REGION:-eu-west-2}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/var/task/src
+      - ./data:/var/task/data
+    depends_on:
+      - dynamodb
+
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    user: root
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-dbPath", "/data"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb_data:/data
+
+volumes:
+  web_node_modules:
+  dynamodb_data:
