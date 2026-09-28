@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, FastAPI
 
 from api.require_access_token import require_access_token
+from api.routes.billing_me import router as billing_me_router
 from api.routes.create_chat import router as create_chat_router
 from api.routes.delete_chat import router as delete_chat_router
 from api.routes.get_chat import router as get_chat_router
@@ -22,6 +23,7 @@ def mount_routes(app: FastAPI) -> None:
     app.include_router(health_router)
     protected = APIRouter(dependencies=[Depends(require_access_token)])
     routers: tuple[APIRouter, ...] = (
+        billing_me_router,
         create_chat_router,
         delete_chat_router,
         list_chats_router,

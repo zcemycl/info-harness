@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from api.app import app
 from api.require_access_token import ChatCaller, require_access_token
+from tools.billing.consume_run import RunQuotaExceeded
 
 
 def test_chat_message_stores_follow_up_brief(
@@ -102,3 +103,26 @@ def test_chat_routes_require_cognito(
     client = TestClient(app)
     assert client.get("/health").status_code == 200
     assert client.get("/chats").status_code == 401
+
+
+def test_over_quota_returns_the_reset_date(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("CHAT_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("CHAT_S3_BUCKET", "")
+    monkeypatch.setenv("BILLING_MODE", "table")
+    monkeypatch.setenv("FREE_RESEARCH_RUNS", "2")
+
+    def deny(_user_id: str, _limit: int, client: object = None) -> int:
+        del client
+        raise RunQuotaExceeded(2, 2, "2026-10-28")
+
+    monkeypatch.setattr("api.routes.post_message.consume_run", deny)
+    app.dependency_overrides[require_access_token] = lambda: ChatCaller("token", "user")
+    client = TestClient(app)
+    chat_id = client.post("/chats").json()["chat_id"]
+    blocked = client.post(f"/chats/{chat_id}/messages", json={"prompt": "again"})
+    app.dependency_overrides.clear()
+    assert blocked.status_code == 402
+    assert blocked.json()["detail"]["resets_on"] == "2026-10-28"
