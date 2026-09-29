@@ -115,11 +115,10 @@ def test_over_quota_returns_the_reset_date(
     monkeypatch.setenv("BILLING_MODE", "table")
     monkeypatch.setenv("FREE_RESEARCH_RUNS", "2")
 
-    def deny(_user_id: str, _limit: int, client: object = None) -> int:
-        del client
+    def deny(_user_id: str) -> bool:
         raise RunQuotaExceeded(2, 2, "2026-10-28")
 
-    monkeypatch.setattr("api.routes.post_message.consume_run", deny)
+    monkeypatch.setattr("api.routes.post_message.reserve_run", deny)
     app.dependency_overrides[require_access_token] = lambda: ChatCaller("token", "user")
     client = TestClient(app)
     chat_id = client.post("/chats").json()["chat_id"]

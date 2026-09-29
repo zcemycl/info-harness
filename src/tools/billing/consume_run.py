@@ -7,8 +7,8 @@ from typing import Any
 from botocore.exceptions import ClientError
 
 from tools.billing.billing_client import billing_client
+from tools.billing.metered_window import metered_window
 from tools.billing.table_names import billing_table_names
-from tools.billing.usage_period import usage_period
 
 
 class RunQuotaExceeded(Exception):
@@ -24,7 +24,7 @@ class RunQuotaExceeded(Exception):
 def consume_run(user_id: str, limit: int, client: Any | None = None) -> int:
     """Add one to the open window. Raise when ``count`` is already at ``limit``."""
     dynamo = billing_client() if client is None else client
-    period = usage_period(user_id, dynamo)
+    period = metered_window(user_id, dynamo)
     usage = billing_table_names()[1]
     key = {"user_id": {"S": user_id}, "period": {"S": period.key}}
     try:

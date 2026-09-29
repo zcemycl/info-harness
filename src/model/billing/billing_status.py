@@ -12,6 +12,7 @@ class BillingStatus(BaseModel):
 
     mode: BillingMode
     plan: str
+    status: str | None = None
     runs_used: int | None = None
     runs_limit: int | None = Field(default=None, ge=1)
     period_start: str | None = None

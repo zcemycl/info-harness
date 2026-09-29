@@ -19,6 +19,7 @@ dependencies = [
     "hc-datacore[knowledge,guardrails]",
     "uvicorn>=0.54.0",
     "cryptography>=50.0.1",
+    "stripe>=15.4.0",
 ]
 
 [build-system]

@@ -5,14 +5,14 @@ from __future__ import annotations
 from botocore.exceptions import ClientError
 
 from tools.billing.billing_client import billing_client
+from tools.billing.metered_window import metered_window
 from tools.billing.table_names import billing_table_names
-from tools.billing.usage_period import usage_period
 
 
 def release_run(user_id: str) -> None:
     """Decrement the open window when a consumed run never starts."""
     client = billing_client()
-    period = usage_period(user_id, client)
+    period = metered_window(user_id, client)
     usage = billing_table_names()[1]
     try:
         client.update_item(

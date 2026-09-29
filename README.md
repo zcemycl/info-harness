@@ -331,6 +331,18 @@ The API container gets `DYNAMODB_ENDPOINT_URL=http://dynamodb:8000`. From the ho
 
 Those AWS tables already exist. The defaults are `hc-platform-main-billing-entitlements` (key `cognito_sub`) and `hc-platform-main-billing-usage` (keys `user_id`, `period`). Override either with `BILLING_ENTITLEMENTS_TABLE` or `BILLING_USAGE_TABLE`. Leave `DYNAMODB_ENDPOINT_URL` unset on Lambda. Set `BILLING_MODE=table` and `FREE_RESEARCH_RUNS` there. The role needs `GetItem`, `PutItem`, and `UpdateItem` on both tables.
 
+`BILLING_MODE=stripe` uses the same tables. A user without an active subscription stays on `FREE_RESEARCH_RUNS`. Status `active` or `trialing` before `current_period_end` uses `PRO_RESEARCH_RUNS`. Checkout is `POST /billing/checkout`, the Customer Portal is `POST /billing/portal`, and the signed webhook is `POST /billing/webhook` with no Cognito authorizer. Set `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`, and `APP_PUBLIC_URL`. `APP_PUBLIC_URL` is the site origin plus the web basename, such as `http://localhost:3000/info-harness`. Checkout returns to `{APP_PUBLIC_URL}/billing/success` and `{APP_PUBLIC_URL}/billing/cancel`. The Customer Portal returns to `{APP_PUBLIC_URL}/app`. Leave Stripe Tax off until a tax registration exists. Rebuild the API image after adding the Stripe package.
+
+Local webhook forwarding uses the Stripe CLI. Lambda does not run these commands. On AWS, register `POST /billing/webhook` in the Stripe Dashboard and put that endpoint’s signing secret in the Lambda environment.
+
+```bash
+npm i -g @stripe/cli
+stripe login
+stripe listen --events checkout.session.completed,customer.subscription.updated,customer.subscription.deleted --forward-to localhost:8080/billing/webhook
+```
+
+Copy the `whsec_` value from `stripe listen` into `STRIPE_WEBHOOK_SECRET`. That secret is only for the local listener.
+
 ```mermaid
 flowchart LR
   localPage[localhost:3000]

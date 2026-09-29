@@ -18,6 +18,7 @@ export function ChatPage() {
   const [prompt, setPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [quota, setQuota] = useState<{ resetsOn: string | null } | null>(null);
+  const [billingMode, setBillingMode] = useState<"open" | "table" | "stripe" | null>(null);
   const [usageTick, setUsageTick] = useState(0);
   const token = accessToken ?? "";
 
@@ -163,7 +164,7 @@ export function ChatPage() {
             </li>
           ))}
         </ul>
-        <RunLimitHint token={token} revision={usageTick} />
+        <RunLimitHint token={token} revision={usageTick} onMode={setBillingMode} />
       </aside>
       <main className="flex min-h-0 flex-col overflow-hidden p-4">
         {error ? <p className="mb-3 shrink-0 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
@@ -187,7 +188,9 @@ export function ChatPage() {
           </ol>
         </div>
       </main>
-      {quota ? <QuotaDialog notice={quota} onClose={() => setQuota(null)} /> : null}
+      {quota ? (
+        <QuotaDialog notice={quota} token={token} mode={billingMode} onClose={() => setQuota(null)} />
+      ) : null}
     </div>
   );
 }
