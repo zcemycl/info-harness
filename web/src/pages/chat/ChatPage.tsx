@@ -5,6 +5,8 @@ import { RunActivity } from "@/components/step-graph/RunActivity";
 import { useAuth } from "@/hooks";
 import type { ChatMessage, ChatMeta, RunEvent } from "@/types";
 import { followRun } from "./followRun";
+import { QuotaDialog } from "./QuotaDialog";
+import { RunLimitHint } from "./RunLimitHint";
 
 export function ChatPage() {
   const { accessToken, logout, user } = useAuth();
@@ -15,6 +17,8 @@ export function ChatPage() {
   const [settled, setSettled] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [quota, setQuota] = useState<{ resetsOn: string | null } | null>(null);
+  const [usageTick, setUsageTick] = useState(0);
   const token = accessToken ?? "";
 
   const accountId = user?.userId ?? "";
@@ -111,18 +115,27 @@ export function ChatPage() {
         method: "POST",
         body: JSON.stringify({ prompt: text }),
       });
+      if (response.status === 402) {
+        const payload = (await response.json()) as { detail?: { resets_on?: string } };
+        setMessages((current) => current.slice(0, -1));
+        setPrompt(text);
+        setQuota({ resetsOn: payload.detail?.resets_on ?? null });
+        return;
+      }
       if (!response.ok) throw new Error(await response.text());
       const body = (await response.json()) as { run_id: string };
       await follow(body.run_id);
       await loadChats();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Send failed");
+    } finally {
+      setUsageTick((current) => current + 1);
     }
   }
 
   return (
-    <div className="grid min-h-svh grid-cols-1 bg-[#f4f7f5] md:grid-cols-[260px_1fr]">
-      <aside className="flex flex-col gap-3 border-b border-[#0c1f1a]/10 bg-[#efe8db] p-4 md:border-r md:border-b-0">
+    <div className="grid h-svh grid-cols-1 grid-rows-[minmax(0,42svh)_minmax(0,1fr)] overflow-hidden bg-[#f4f7f5] md:grid-cols-[260px_1fr] md:grid-rows-1">
+      <aside className="flex min-h-0 flex-col gap-3 overflow-hidden border-b border-[#0c1f1a]/10 bg-[#efe8db] p-4 md:border-r md:border-b-0">
         <div className="flex items-center justify-between">
           <h1 className="font-mono text-sm font-bold tracking-wide">info-harness</h1>
           <button type="button" className="text-sm underline" onClick={() => void logout()}>
@@ -133,7 +146,7 @@ export function ChatPage() {
         <button type="button" className="rounded-lg bg-[#0c1f1a] px-3 py-2 text-sm text-white" onClick={() => void createChat()}>
           New chat
         </button>
-        <ul className="space-y-1 overflow-auto">
+        <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto">
           {chats.map((chat) => (
             <li key={chat.chat_id} className="flex items-center gap-1">
               <button type="button" className="min-w-0 flex-1 truncate rounded px-2 py-1 text-left text-sm hover:bg-[#d9cbb3]" onClick={() => void openChat(chat.chat_id)}>
@@ -150,27 +163,31 @@ export function ChatPage() {
             </li>
           ))}
         </ul>
+        <RunLimitHint token={token} revision={usageTick} />
       </aside>
-      <main className="flex min-h-svh flex-col p-4">
-        {error ? <p className="mb-3 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
-        <form className="grid grid-cols-[1fr_auto] gap-2" onSubmit={(event) => void send(event)}>
+      <main className="flex min-h-0 flex-col overflow-hidden p-4">
+        {error ? <p className="mb-3 shrink-0 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
+        <form className="grid shrink-0 grid-cols-[1fr_auto] gap-2" onSubmit={(event) => void send(event)}>
           <textarea className="rounded-lg border px-3 py-2" rows={3} value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="Ask a research question" required />
           <button className="rounded-lg bg-[#0c1f1a] px-4 text-white" type="submit">
             Send
           </button>
         </form>
-        {stages.length > 0 ? <RunActivity events={stages} settled={settled} /> : null}
-        <ol className="mt-3 flex-1 space-y-2 overflow-auto">
-          {messages.map((message, index) => (
-            <li
-              key={`${message.ts}-${index}`}
-              className={`rounded-lg px-3 py-2 text-sm ${message.role === "user" ? "whitespace-pre-wrap bg-[#e7f0ea]" : "border bg-white"}`}
-            >
-              {message.role === "assistant" ? <MarkdownMessage text={message.content} /> : message.content}
-            </li>
-          ))}
-        </ol>
+        <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
+          {stages.length > 0 ? <RunActivity events={stages} settled={settled} /> : null}
+          <ol className="mt-3 space-y-2">
+            {messages.map((message, index) => (
+              <li
+                key={`${message.ts}-${index}`}
+                className={`rounded-lg px-3 py-2 text-sm ${message.role === "user" ? "whitespace-pre-wrap bg-[#e7f0ea]" : "border bg-white"}`}
+              >
+                {message.role === "assistant" ? <MarkdownMessage text={message.content} /> : message.content}
+              </li>
+            ))}
+          </ol>
+        </div>
       </main>
+      {quota ? <QuotaDialog notice={quota} onClose={() => setQuota(null)} /> : null}
     </div>
   );
 }
