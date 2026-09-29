@@ -21,6 +21,10 @@ def test_open_mode_has_no_run_limit(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_table_mode_returns_the_configured_cap(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BILLING_MODE", "table")
     monkeypatch.setenv("FREE_RESEARCH_RUNS", "5")
+    monkeypatch.setattr(
+        "tools.billing.load_billing.read_usage",
+        lambda _user_id: (0, "2026-09-01", "2026-10-01"),
+    )
     app.dependency_overrides[require_access_token] = lambda: ChatCaller("token", "user")
     body = TestClient(app).get("/billing/me").json()
     app.dependency_overrides.clear()

@@ -12,8 +12,6 @@ from tools.billing.usage_period import usage_period
 def release_run(user_id: str) -> None:
     """Decrement the open window when a consumed run never starts."""
     client = billing_client()
-    if client is None:
-        return
     period = usage_period(user_id, client)
     try:
         client.update_item(

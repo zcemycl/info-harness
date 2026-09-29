@@ -8,6 +8,7 @@ import pytest
 from botocore.exceptions import ClientError
 
 from model.billing.billing_config import BillingConfig
+from tools.billing.billing_client import billing_client
 from tools.billing.ensure_billing_tables import (
     ENTITLEMENTS_TABLE,
     USAGE_TABLE,
@@ -33,6 +34,44 @@ def test_table_mode_requires_a_positive_cap(monkeypatch: pytest.MonkeyPatch) -> 
     monkeypatch.setenv("FREE_RESEARCH_RUNS", "")
     with pytest.raises(ValueError, match="FREE_RESEARCH_RUNS"):
         BillingConfig.from_env()
+
+
+def test_client_uses_aws_when_the_local_endpoint_is_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("DYNAMODB_ENDPOINT_URL", raising=False)
+    monkeypatch.setenv("DYNAMODB_REGION", "eu-west-2")
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "real")
+    captured: dict[str, Any] = {}
+
+    def fake_client(name: str, **kwargs: str) -> object:
+        captured["name"] = name
+        captured["kwargs"] = kwargs
+        return object()
+
+    monkeypatch.setattr("tools.billing.billing_client.boto3.client", fake_client)
+    billing_client()
+    assert captured["name"] == "dynamodb"
+    assert captured["kwargs"]["region_name"] == "eu-west-2"
+    assert "endpoint_url" not in captured["kwargs"]
+    assert "aws_access_key_id" not in captured["kwargs"]
+
+
+def test_client_uses_the_local_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DYNAMODB_ENDPOINT_URL", "http://localhost:8000")
+    monkeypatch.setenv("DYNAMODB_REGION", "eu-west-2")
+    monkeypatch.delenv("AWS_ACCESS_KEY_ID", raising=False)
+    captured: dict[str, Any] = {}
+
+    def fake_client(name: str, **kwargs: str) -> object:
+        del name
+        captured["kwargs"] = kwargs
+        return object()
+
+    monkeypatch.setattr("tools.billing.billing_client.boto3.client", fake_client)
+    billing_client()
+    assert captured["kwargs"]["endpoint_url"] == "http://localhost:8000"
+    assert captured["kwargs"]["aws_access_key_id"] == "local"
 
 
 def test_ensure_skips_without_an_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:

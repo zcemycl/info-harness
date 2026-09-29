@@ -18,6 +18,7 @@ def test_chat_message_stores_follow_up_brief(
 ) -> None:
     monkeypatch.setenv("CHAT_DATA_DIR", str(tmp_path))
     monkeypatch.setenv("CHAT_S3_BUCKET", "")
+    monkeypatch.setenv("BILLING_MODE", "open")
     monkeypatch.setenv("RESEARCH_FUNCTION_NAME", "")
     monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "")
     started: dict[str, str] = {}

@@ -8,10 +8,8 @@ from tools.billing.usage_period import usage_period
 
 
 def read_usage(user_id: str) -> tuple[int, str | None, str | None]:
-    """Return ``(count, period_start, period_end)``. Missing storage counts as 0."""
+    """Return ``(count, period_start, period_end)``. A missing row counts as 0."""
     client = billing_client()
-    if client is None:
-        return 0, None, None
     period = usage_period(user_id, client)
     found = client.get_item(
         TableName=USAGE_TABLE,

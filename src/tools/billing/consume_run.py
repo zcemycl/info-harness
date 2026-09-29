@@ -24,8 +24,6 @@ class RunQuotaExceeded(Exception):
 def consume_run(user_id: str, limit: int, client: Any | None = None) -> int:
     """Add one to the open window. Raise when ``count`` is already at ``limit``."""
     dynamo = billing_client() if client is None else client
-    if dynamo is None:
-        return 0
     period = usage_period(user_id, dynamo)
     key = {"user_id": {"S": user_id}, "period": {"S": period.key}}
     try:
