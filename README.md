@@ -311,7 +311,7 @@ Locally, leave `VITE_AGENTIC_CHAT_STREAM_URL` empty. Chat, polling, and the even
 
 ### Docker Compose
 
-Same local stack in containers. `src/`, `web/`, and `data/` are bind-mounted so edits reload without an image rebuild. DynamoDB Local is included for later use; the app does not read it yet.
+Same local stack in containers. `src/`, `web/`, and `data/` are bind-mounted so edits reload without an image rebuild. DynamoDB Local holds the free-plan usage tables.
 
 ```bash
 docker compose up --build
@@ -324,6 +324,12 @@ docker compose up --build
 | dynamodb | http://localhost:8000 | named volume `dynamodb_data` |
 
 The API container gets `DYNAMODB_ENDPOINT_URL=http://dynamodb:8000`. From the host, the same database is `http://127.0.0.1:8000`. The API image build reads `PRIVATE_REPO_TOKEN` from the root `.env` to install private `hc-datacore`. Rebuild `api` when Python dependencies change, and `web` when `web/package-lock.json` changes. The Lambda image at the repo-root `Dockerfile` is separate from this stack.
+
+### Free-plan tables
+
+`create_app()` calls `ensure_billing_tables()` on startup. That function creates the billing tables only when `DYNAMODB_ENDPOINT_URL` is set. Compose sets it, so DynamoDB Local gets the same names the app reads. Lambda leaves the endpoint unset, so startup returns before any `CreateTable` call and the client uses the default AWS endpoint with the function role.
+
+Those AWS tables already exist. The defaults are `hc-platform-main-billing-entitlements` (key `cognito_sub`) and `hc-platform-main-billing-usage` (keys `user_id`, `period`). Override either with `BILLING_ENTITLEMENTS_TABLE` or `BILLING_USAGE_TABLE`. Leave `DYNAMODB_ENDPOINT_URL` unset on Lambda. Set `BILLING_MODE=table` and `FREE_RESEARCH_RUNS` there. The role needs `GetItem`, `PutItem`, and `UpdateItem` on both tables.
 
 ```mermaid
 flowchart LR

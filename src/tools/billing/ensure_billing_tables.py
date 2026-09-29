@@ -8,9 +8,7 @@ from typing import Any
 from botocore.exceptions import ClientError
 
 from tools.billing.billing_client import billing_client
-
-ENTITLEMENTS_TABLE = "billing_entitlements"
-USAGE_TABLE = "billing_usage"
+from tools.billing.table_names import billing_table_names
 
 
 def ensure_billing_tables(client: Any | None = None) -> None:
@@ -25,15 +23,16 @@ def ensure_billing_tables(client: Any | None = None) -> None:
     dynamo = client or billing_client()
     if dynamo is None:
         return
+    entitlements, usage = billing_table_names()
     _create_if_missing(
         dynamo,
-        ENTITLEMENTS_TABLE,
+        entitlements,
         [{"AttributeName": "cognito_sub", "AttributeType": "S"}],
         [{"AttributeName": "cognito_sub", "KeyType": "HASH"}],
     )
     _create_if_missing(
         dynamo,
-        USAGE_TABLE,
+        usage,
         [
             {"AttributeName": "user_id", "AttributeType": "S"},
             {"AttributeName": "period", "AttributeType": "S"},

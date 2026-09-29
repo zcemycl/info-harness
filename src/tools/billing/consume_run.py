@@ -7,7 +7,7 @@ from typing import Any
 from botocore.exceptions import ClientError
 
 from tools.billing.billing_client import billing_client
-from tools.billing.ensure_billing_tables import USAGE_TABLE
+from tools.billing.table_names import billing_table_names
 from tools.billing.usage_period import usage_period
 
 
@@ -25,10 +25,11 @@ def consume_run(user_id: str, limit: int, client: Any | None = None) -> int:
     """Add one to the open window. Raise when ``count`` is already at ``limit``."""
     dynamo = billing_client() if client is None else client
     period = usage_period(user_id, dynamo)
+    usage = billing_table_names()[1]
     key = {"user_id": {"S": user_id}, "period": {"S": period.key}}
     try:
         updated = dynamo.update_item(
-            TableName=USAGE_TABLE,
+            TableName=usage,
             Key=key,
             UpdateExpression="SET #c = if_not_exists(#c, :zero) + :one",
             ConditionExpression="attribute_not_exists(#c) OR #c < :limit",

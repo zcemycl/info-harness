@@ -9,11 +9,8 @@ from botocore.exceptions import ClientError
 
 from model.billing.billing_config import BillingConfig
 from tools.billing.billing_client import billing_client
-from tools.billing.ensure_billing_tables import (
-    ENTITLEMENTS_TABLE,
-    USAGE_TABLE,
-    ensure_billing_tables,
-)
+from tools.billing.ensure_billing_tables import ensure_billing_tables
+from tools.billing.table_names import billing_table_names
 
 
 def test_open_mode_ignores_the_cap(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -79,13 +76,25 @@ def test_ensure_skips_without_an_endpoint(monkeypatch: pytest.MonkeyPatch) -> No
     ensure_billing_tables(client=_boom())
 
 
+def test_default_names_match_the_aws_tables(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("BILLING_ENTITLEMENTS_TABLE", raising=False)
+    monkeypatch.delenv("BILLING_USAGE_TABLE", raising=False)
+    assert billing_table_names() == (
+        "hc-platform-main-billing-entitlements",
+        "hc-platform-main-billing-usage",
+    )
+
+
 def test_ensure_creates_both_tables(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DYNAMODB_ENDPOINT_URL", "http://localhost:8000")
+    monkeypatch.delenv("BILLING_ENTITLEMENTS_TABLE", raising=False)
+    monkeypatch.delenv("BILLING_USAGE_TABLE", raising=False)
     client = _MemoryDynamo()
     ensure_billing_tables(client=client)
     ensure_billing_tables(client=client)
-    assert client.names == {ENTITLEMENTS_TABLE, USAGE_TABLE}
-    usage = client.created[USAGE_TABLE]
+    entitlements, usage_name = billing_table_names()
+    assert client.names == {entitlements, usage_name}
+    usage = client.created[usage_name]
     assert [key["AttributeName"] for key in usage["KeySchema"]] == [
         "user_id",
         "period",
