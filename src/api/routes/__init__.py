@@ -5,7 +5,10 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, FastAPI
 
 from api.require_access_token import require_access_token
+from api.routes.billing_checkout import router as billing_checkout_router
 from api.routes.billing_me import router as billing_me_router
+from api.routes.billing_portal import router as billing_portal_router
+from api.routes.billing_webhook import router as billing_webhook_router
 from api.routes.create_chat import router as create_chat_router
 from api.routes.delete_chat import router as delete_chat_router
 from api.routes.get_chat import router as get_chat_router
@@ -21,9 +24,12 @@ from api.routes.stream_events import router as stream_events_router
 def mount_routes(app: FastAPI) -> None:
     """Attach chat and run routes. CLI is not mounted here."""
     app.include_router(health_router)
+    app.include_router(billing_webhook_router)
     protected = APIRouter(dependencies=[Depends(require_access_token)])
     routers: tuple[APIRouter, ...] = (
         billing_me_router,
+        billing_checkout_router,
+        billing_portal_router,
         create_chat_router,
         delete_chat_router,
         list_chats_router,

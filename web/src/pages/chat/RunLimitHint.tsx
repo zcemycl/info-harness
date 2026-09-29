@@ -1,14 +1,26 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/api/client";
 
+type BillingMode = "open" | "table" | "stripe";
+
 type BillingMe = {
-  mode: "open" | "table";
+  mode: BillingMode;
+  plan: string;
   runs_limit: number | null;
   runs_used: number | null;
 };
 
-export function RunLimitHint({ token, revision }: { token: string; revision: number }) {
+export function RunLimitHint({
+  token,
+  revision,
+  onMode,
+}: {
+  token: string;
+  revision: number;
+  onMode?: (mode: BillingMode) => void;
+}) {
   const [body, setBody] = useState<BillingMe | null>(null);
+  const [portalError, setPortalError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -19,7 +31,9 @@ export function RunLimitHint({ token, revision }: { token: string; revision: num
         return (await response.json()) as BillingMe;
       })
       .then((next) => {
-        if (!cancelled && next) setBody(next);
+        if (cancelled || !next) return;
+        setBody(next);
+        onMode?.(next.mode);
       })
       .catch(() => {
         if (!cancelled) setBody(null);
@@ -27,12 +41,28 @@ export function RunLimitHint({ token, revision }: { token: string; revision: num
     return () => {
       cancelled = true;
     };
-  }, [token, revision]);
+  }, [token, revision, onMode]);
+
+  async function manage() {
+    setPortalError(null);
+    const response = await apiFetch(token, "/billing/portal", { method: "POST" });
+    if (!response.ok) {
+      setPortalError("Billing portal is unavailable.");
+      return;
+    }
+    const payload = (await response.json()) as { url?: string };
+    if (!payload.url) {
+      setPortalError("Billing portal is unavailable.");
+      return;
+    }
+    window.location.assign(payload.url);
+  }
 
   const limit = body?.runs_limit;
   const used = body?.runs_used ?? 0;
-  const metered = body?.mode === "table" && limit != null;
+  const metered = (body?.mode === "table" || body?.mode === "stripe") && limit != null;
   const width = metered && limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
+  const planLabel = body?.plan === "pro" ? "Pro Plan" : "Free Plan";
 
   if (!body) {
     return (
@@ -57,7 +87,7 @@ export function RunLimitHint({ token, revision }: { token: string; revision: num
     <div className="mt-auto border-t border-[#0c1f1a]/10 pt-3">
       <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-[#0c1f1a]">
         <PlanIcon />
-        Free Plan
+        {planLabel}
       </p>
       <p className="mb-1.5 font-mono text-xs text-[#5a7a6c]">
         Usage: {used}/{limit}
@@ -72,6 +102,12 @@ export function RunLimitHint({ token, revision }: { token: string; revision: num
       >
         <div className="h-full rounded-full bg-[#0c1f1a] transition-[width]" style={{ width: `${width}%` }} />
       </div>
+      {body.plan === "pro" ? (
+        <button type="button" className="mt-2 text-xs underline text-[#1f7a4d]" onClick={() => void manage()}>
+          Manage subscription
+        </button>
+      ) : null}
+      {portalError ? <p className="mt-1 text-xs text-red-700">{portalError}</p> : null}
     </div>
   );
 }

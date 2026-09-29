@@ -5,8 +5,6 @@ from __future__ import annotations
 from datetime import UTC, date, datetime
 from typing import Any
 
-from botocore.exceptions import ClientError
-
 from model.billing.usage_period import UsagePeriod
 from tools.billing.open_window import open_window
 from tools.billing.table_names import billing_table_names
@@ -27,21 +25,14 @@ def _anchor(user_id: str, client: Any, today: date) -> date:
     raw = found.get("Item", {}).get("free_anchor", {}).get("S")
     if raw:
         return date.fromisoformat(str(raw))
-    try:
-        client.put_item(
-            TableName=entitlements,
-            Item={
-                "cognito_sub": {"S": user_id},
-                "free_anchor": {"S": today.isoformat()},
-            },
-            ConditionExpression="attribute_not_exists(cognito_sub)",
-        )
-    except ClientError as exc:
-        code = exc.response.get("Error", {}).get("Code")
-        if code != "ConditionalCheckFailedException":
-            raise
-        found = client.get_item(TableName=entitlements, Key=key)
-        raw = found.get("Item", {}).get("free_anchor", {}).get("S")
-        if raw:
-            return date.fromisoformat(str(raw))
+    client.update_item(
+        TableName=entitlements,
+        Key=key,
+        UpdateExpression="SET free_anchor = if_not_exists(free_anchor, :today)",
+        ExpressionAttributeValues={":today": {"S": today.isoformat()}},
+    )
+    found = client.get_item(TableName=entitlements, Key=key)
+    raw = found.get("Item", {}).get("free_anchor", {}).get("S")
+    if raw:
+        return date.fromisoformat(str(raw))
     return today

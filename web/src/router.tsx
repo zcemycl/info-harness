@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "@/components";
 import { PRIVATE_HOME_PATH } from "@/constants";
 import { AuthProvider } from "@/context";
+import { BillingCancelPage } from "@/pages/BillingCancelPage";
+import { BillingSuccessPage } from "@/pages/BillingSuccessPage";
 import { ChatPage } from "@/pages/chat";
 import { LoginPage } from "@/pages/LoginPage";
 
@@ -15,6 +17,8 @@ export function AppRouter() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path={PRIVATE_HOME_PATH} element={<ChatPage />} />
+            <Route path="/billing/success" element={<BillingSuccessPage />} />
+            <Route path="/billing/cancel" element={<BillingCancelPage />} />
           </Route>
           <Route path="*" element={<Navigate to={PRIVATE_HOME_PATH} replace />} />
         </Routes>

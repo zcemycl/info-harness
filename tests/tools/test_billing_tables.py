@@ -21,6 +21,20 @@ def test_open_mode_ignores_the_cap(monkeypatch: pytest.MonkeyPatch) -> None:
     assert config.free_research_runs is None
 
 
+def test_stripe_mode_requires_both_caps(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BILLING_MODE", "stripe")
+    monkeypatch.setenv("FREE_RESEARCH_RUNS", "2")
+    monkeypatch.setenv("PRO_RESEARCH_RUNS", "100")
+    config = BillingConfig.from_env()
+    assert config.mode == "stripe"
+    assert config.free_research_runs == 2
+    assert config.pro_research_runs == 100
+
+    monkeypatch.setenv("PRO_RESEARCH_RUNS", "")
+    with pytest.raises(ValueError, match="PRO_RESEARCH_RUNS"):
+        BillingConfig.from_env()
+
+
 def test_table_mode_requires_a_positive_cap(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BILLING_MODE", "table")
     monkeypatch.setenv("FREE_RESEARCH_RUNS", "5")
